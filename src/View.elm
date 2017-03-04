@@ -15,7 +15,7 @@ view model =
 
 frame w h model =
   case model of
-    Model.Frame children ->
+    Model.Frame tile children ->
       div [ style [ "height" => (toString h ++ "%") ] ] (List.map (frame w (100 // (List.length children))) children)
     Model.Window id ->
       div [ style [ "display" => "flex", "flex-flow" => "column", "height" => (toString h ++ "%") ] ]

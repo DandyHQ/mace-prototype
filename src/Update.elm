@@ -15,10 +15,10 @@ update msg model =
 newWindow : Int -> Int -> Model.Frame -> Model.Frame
 newWindow index target model =
   case model of
-    Model.Frame children ->
-      Model.Frame (List.map (newWindow index target) children)
+    Model.Frame tile children ->
+      Model.Frame tile (List.map (newWindow index target) children)
     Model.Window id ->
       if id == target then
-        Model.Frame [ Model.Window id, Model.Window (index + 1) ]
+        Model.Frame Model.Horiz [ Model.Window id, Model.Window (index + 1) ]
       else
         model
