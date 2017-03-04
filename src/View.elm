@@ -21,10 +21,11 @@ frame w h model =
       div [ style [ "display" => "flex", "flex-flow" => "column", "width" => (toString w ++ "%"), "height" => (toString h ++ "%") ] ] (List.map (frame 100 (100 // (List.length children))) children)
     Frame Vert children ->
       div [ style [ "display" => "flex", "flex-flow" => "row", "width" => (toString w ++ "%"), "height" => (toString h ++ "%") ] ] (List.map (frame (100 // (List.length children)) 100) children)
-    Frame Tabbed children ->
+    Frame (Tabbed focused) children ->
       div [ style [ "width" => (toString w ++ "%"), "height" => (toString h ++ "%") ] ]
-        [ div [] [ text "Tab bar" ]
-        , case Array.get 0 (Array.fromList children) of
+        [ div []
+            (List.indexedMap (\k v -> button [ onClick (Msg.FocusTab v) ] [ text ("tab " ++ toString k) ]) children)
+        , case Array.get focused (Array.fromList children) of
             Just a -> frame 100 100 a
             Nothing -> text "Error occured"
         ]
@@ -34,7 +35,7 @@ frame w h model =
             [ text (toString id)
             , button [ onClick (Msg.NewWindow id Vert) ] [ text "new-v" ]
             , button [ onClick (Msg.NewWindow id Horiz) ] [ text "new-h" ]
-            , button [ onClick (Msg.NewWindow id Tabbed) ] [ text "new-tab" ]
+            , button [ onClick (Msg.NewWindow id (Tabbed 0)) ] [ text "new-tab" ]
             ]
         , textarea [ style [ "flex" => "1 1 auto" ] ] []
         ]

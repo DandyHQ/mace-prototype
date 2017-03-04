@@ -4,3 +4,4 @@ import Types
 
 type Msg
   = NewWindow Int Types.Tile
+  | FocusTab Types.Frame
