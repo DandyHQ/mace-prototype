@@ -1,4 +1,6 @@
 module Msg exposing (Msg(..))
 
+import Types
+
 type Msg
-  = NewWindow Int
+  = NewWindow Int Types.Tile

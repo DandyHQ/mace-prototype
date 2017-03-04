@@ -1,16 +1,13 @@
-module Model exposing (Model, Frame(..), Tile(..), init)
+module Model exposing (Model, init)
 
 import Msg exposing (Msg)
-
-type Frame = Frame Tile (List Frame) | Window Int
-
-type Tile = Horiz | Vert | Tabbed
+import Types exposing (Frame(..), Tile(..))
 
 type alias Model =
-  { windowIndex : Int
+  { nextIndex : Int
   , frames : Frame
   }
 
 init : ( Model, Cmd Msg )
 init =
-  ( Model 3 (Frame Horiz [ Window 1, Frame Horiz [ Window 2, Window 3 ] ]), Cmd.none )
+  ( Model 2 (Frame Horiz [ Window 1 ]), Cmd.none )

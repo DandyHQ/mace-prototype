@@ -2,23 +2,24 @@ module Update exposing (update)
 
 import Model exposing (Model)
 import Msg exposing (Msg(..))
+import Types exposing (Frame(..), Tile(..))
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
   case msg of
-    NewWindow id ->
-      ( { model | windowIndex = model.windowIndex + 1
-        , frames = newWindow model.windowIndex id model.frames
+    NewWindow id t ->
+      ( { model | nextIndex = model.nextIndex + 1
+        , frames = newWindow model.nextIndex id t model.frames
         }
       , Cmd.none)
 
-newWindow : Int -> Int -> Model.Frame -> Model.Frame
-newWindow index target model =
+newWindow : Int -> Int -> Tile -> Frame -> Frame
+newWindow index target t model =
   case model of
-    Model.Frame tile children ->
-      Model.Frame tile (List.map (newWindow index target) children)
-    Model.Window id ->
+    Frame tile children ->
+      Frame tile (List.map (newWindow index target t) children)
+    Window id ->
       if id == target then
-        Model.Frame Model.Horiz [ Model.Window id, Model.Window (index + 1) ]
+        Frame t [ Window id, Window index ]
       else
         model
