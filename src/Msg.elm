@@ -1,4 +1,4 @@
 module Msg exposing (Msg(..))
 
 type Msg
-  = NoOp
+  = NewWindow Int
