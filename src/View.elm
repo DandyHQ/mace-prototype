@@ -29,10 +29,16 @@ frame w h f =
   case f of
     Frame s Horiz c ->
       div [ frameStyle s "row" [] ]
-        ( frameChildren (w // 2) h c)
+        ( List.intersperse
+            (div [ style [ "width" => "2px", "background" => "red", "cursor" => "ew-resize" ] ] [])
+            (frameChildren (w // 2) h c)
+        )
     Frame s Vert c ->
       div [ frameStyle s "column" [] ]
-        ( frameChildren w (h // 2) c)
+        ( List.intersperse
+            (div [ style [ "height" => "2px", "background" => "blue", "cursor" => "ns-resize" ] ] [])
+            (frameChildren w (h // 2) c)
+        )
     Frame s None c ->
       div [ frameStyle s "row" [ "border" => "1px solid #aaa" ] ]
         ( frameChildren w h c)
