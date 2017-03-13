@@ -13,7 +13,8 @@ import Types exposing (Window(..), Frame(..), FrameChildren(..), Tile(..))
 
 view : Model -> Html Msg
 view model =
-  frame 500 500 model.frames
+  div [ style [ "width" => "100%", "height" => "100%", "display" => "flex", "direction" => "column" ] ]
+    [ frame 100 100 model.frames ]
 
 frameChildren : Int -> Int -> FrameChildren -> List (Html Msg)
 frameChildren w h f =
@@ -27,14 +28,26 @@ frame : Int -> Int -> Frame -> Html Msg
 frame w h f =
   case f of
     Frame Horiz c ->
-      div [ style [ "width" => (toString w ++ "px"), "height" => (toString h ++ "px"), "background" => "red" ] ]
-        ( frameChildren (w // 3) h c)
+      div [ frameStyle "row" [] ]
+        ( frameChildren (w // 2) h c)
     Frame Vert c ->
-      div [ style [ "width" => (toString w ++ "px"), "height" => (toString h ++ "px"), "background" => "green" ] ]
-        ( frameChildren w (h // 3) c)
+      div [ frameStyle "column" [] ]
+        ( frameChildren w (h // 2) c)
     Frame None c ->
-      div [ style [ "width" => (toString w ++ "px"), "height" => (toString h ++ "px"), "background" => "blue" ] ] [ text "none" ]
+      div [ frameStyle "row" [ "border" => "1px solid #aaa" ] ]
+        ( frameChildren w h c)
 
 window : Int -> Int -> Window -> Html Msg
 window w h f =
-  text "window"
+  text "w "
+
+
+-- STYLES
+
+frameStyle d e =
+  style
+    ([ "display" => "flex"
+    , "flex-direction" => d
+    , "flex-grow" => "1" -- as child
+    , "vertical-align" => "top"
+    ] ++ e)
