@@ -27,14 +27,14 @@ frameChildren w h f =
 frame : Int -> Int -> Frame -> Html Msg
 frame w h f =
   case f of
-    Frame Horiz c ->
-      div [ frameStyle "row" [] ]
+    Frame s Horiz c ->
+      div [ frameStyle s "row" [] ]
         ( frameChildren (w // 2) h c)
-    Frame Vert c ->
-      div [ frameStyle "column" [] ]
+    Frame s Vert c ->
+      div [ frameStyle s "column" [] ]
         ( frameChildren w (h // 2) c)
-    Frame None c ->
-      div [ frameStyle "row" [ "border" => "1px solid #aaa" ] ]
+    Frame s None c ->
+      div [ frameStyle s "row" [ "border" => "1px solid #aaa" ] ]
         ( frameChildren w h c)
 
 window : Int -> Int -> Window -> Html Msg
@@ -44,10 +44,10 @@ window w h f =
 
 -- STYLES
 
-frameStyle d e =
+frameStyle s d e =
   style
     ([ "display" => "flex"
     , "flex-direction" => d
-    , "flex-grow" => "1" -- as child
+    , "flex-grow" => (toString s) -- as child
     , "vertical-align" => "top"
     ] ++ e)
