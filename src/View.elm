@@ -27,19 +27,23 @@ frameChildren w h f =
 frame : Int -> Int -> Frame -> Html Msg
 frame w h f =
   case f of
-    Frame s Horiz c ->
+    Frame i s Horiz c ->
+      let
+        children = frameChildren (w // 2) h c
+        borders = List.map (\v -> div [ onClick (Msg.Resize i v), style [ "width" => "2px", "background" => "red", "cursor" => "ew-resize" ] ] []) (List.range 0 (List.length children))
+        elems = List.drop 1 (List.concat (List.map2 (\a b -> a :: b :: []) borders children))
+      in
       div [ frameStyle s "row" [] ]
-        ( List.intersperse
-            (div [ style [ "width" => "2px", "background" => "red", "cursor" => "ew-resize" ] ] [])
-            (frameChildren (w // 2) h c)
-        )
-    Frame s Vert c ->
+        elems
+    Frame i s Vert c ->
+      let
+        children = frameChildren w (h // 2) c
+        borders = List.map (\v -> div [ onClick (Msg.Resize i v), style [ "height" => "2px", "background" => "blue", "cursor" => "ns-resize" ] ] []) (List.range 0 (List.length children))
+        elems = List.drop 1 (List.concat (List.map2 (\a b -> a :: b :: []) borders children))
+      in
       div [ frameStyle s "column" [] ]
-        ( List.intersperse
-            (div [ style [ "height" => "2px", "background" => "blue", "cursor" => "ns-resize" ] ] [])
-            (frameChildren w (h // 2) c)
-        )
-    Frame s None c ->
+        elems
+    Frame i s None c ->
       div [ frameStyle s "row" [ "border" => "1px solid #aaa" ] ]
         ( frameChildren w h c)
 
