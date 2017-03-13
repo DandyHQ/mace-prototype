@@ -1,5 +1,9 @@
-module Types exposing (Frame(..), Tile(..))
+module Types exposing (Window(..), Frame(..), FrameChildren(..), Tile(..))
 
-type Frame = Frame Tile (List Frame) | Window Int
+type Window = Window Int
 
-type Tile = Horiz | Vert | Tabbed Int
+type Frame = Frame Tile FrameChildren
+
+type FrameChildren = FrameFrame (List Frame) | WindowFrame (List Window)
+
+type Tile = Horiz | Vert | None
