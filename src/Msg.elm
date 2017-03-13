@@ -1,7 +1,7 @@
 module Msg exposing (Msg(..))
 
 import Types
+import Window
 
 type Msg
-  = NewWindow Int Types.Tile
-  | FocusTab Types.Frame
+  = WindowResize Window.Size

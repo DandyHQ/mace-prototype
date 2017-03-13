@@ -6,4 +6,6 @@ import Types exposing (Frame(..), Tile(..))
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
-  ( model, Cmd.none)
+  case msg of
+    WindowResize s ->
+      ( { model | window = s }, Cmd.none )
