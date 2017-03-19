@@ -18,14 +18,14 @@ init =
 initialLayout : Frame
 initialLayout =
   Frame 600 600 0 Horiz ( FrameFrame
-    [ Frame 296 596 0 None ( WindowFrame
+    [ Frame 299 600 0 None ( WindowFrame
         [ Window 1
         , Window 2
         ])
-    , Frame 296 596 300 Vert ( FrameFrame
-        [ Frame 296 292 0 None
+    , Frame 299 600 301 Vert ( FrameFrame
+        [ Frame 299 299 0 None
             ( WindowFrame [ Window 3 ] )
-        , Frame 296 292 292 None ( WindowFrame
+        , Frame 299 299 301 None ( WindowFrame
             [ Window 4
             , Window 5
             , Window 6
