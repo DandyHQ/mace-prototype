@@ -14,36 +14,36 @@ import Types exposing (..)
 view : Model -> Html Msg
 view model =
   div [ style [ "width" => "100%", "height" => "100%", "background-color" => "#aaa" ] ]
-    [ frame 100 100 None model.frames ]
+    [ frame None model.frames ]
 
 frameChildren : Int -> Int -> Tile -> FrameChildren -> List (Html Msg)
 frameChildren w h t f =
   case f of
     FrameFrame l ->
-      List.map (frame w h t) l
+      List.map (frame t) l
     WindowFrame l ->
       List.map (window w h) l
 
-frame : Int -> Int -> Tile -> Frame -> Html Msg
-frame w h t f =
+frame : Tile -> Frame -> Html Msg
+frame t f =
   case f of
-    Frame w h o Horiz c ->
-      div [ frameStyle w h t o "row" [] ]
-        (frameChildren (w // 2) h Horiz c)
+    Frame {width, height} o Horiz c ->
+      div [ frameStyle width height t o "row" [ "background-color" => "#f00" ] ]
+        (frameChildren width height Horiz c)
         -- ( List.intersperse
         --     (div [ style [ "display" => "inline-block", "width" => "2px", "background" => "red", "cursor" => "ew-resize" ] ] [])
         --     (frameChildren (w // 2) h Horiz c)
         -- )
-    Frame w h o Vert c ->
-      div [ frameStyle w h t o "column" [] ]
-        (frameChildren w (h // 2) Vert c)
+    Frame {width, height} o Vert c ->
+      div [ frameStyle width height t o "column" [ "background-color" => "#0f0" ] ]
+        (frameChildren width height Vert c)
         -- ( List.intersperse
         --     (div [ style [ "height" => "2px", "background" => "blue", "cursor" => "ns-resize" ] ] [])
         --     (frameChildren w (h // 2) Vert c)
         -- )
-    Frame w h o None c ->
-      div [ frameStyle w h t o "row" [ "background-color" => "#fff" ] ]
-        ( frameChildren w h None c)
+    Frame {width, height} o None c ->
+      div [ frameStyle width height t o "row" [ "background-color" => "#fff" ] ]
+        ( frameChildren width height None c)
 
 window : Int -> Int -> Window -> Html Msg
 window w h f =

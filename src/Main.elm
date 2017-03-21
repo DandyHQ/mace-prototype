@@ -1,8 +1,9 @@
 import Html exposing (program)
 import Model exposing (Model)
-import Msg exposing (Msg)
+import Msg exposing (..)
 import Update
 import View
+import Window
 
 
 main =
@@ -20,4 +21,4 @@ main =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-  Sub.none
+  Window.resizes WindowResize
