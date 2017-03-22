@@ -18,9 +18,27 @@ view model =
 
 frameChildren : Int -> Int -> Tile -> FrameChildren -> List (Html Msg)
 frameChildren w h t f =
+  let
+    divideFrame l =
+      case l of
+        [] -> []
+        hd :: [] ->
+          frame t hd :: []
+        a :: b :: tl ->
+          case b of
+            Frame _ o _ _ ->
+              frame t a
+                ::
+                  (case t of
+                    Horiz -> div [ style [ "z-index" => "1000", "position" => "absolute", "width" => "2px", "height" => "100%", "background-color" => "#ff0", "cursor" => "ew-resize", "left" => (toString (o - 2) ++ "px") ] ] []
+                    Vert -> div [ style [ "z-index" => "1000", "position" => "absolute", "width" => "100%", "height" => "2px", "background-color" => "#ff0", "cursor" => "ns-resize", "top" => (toString (o - 2) ++ "px") ] ] []
+                    None -> div [] []
+                  )
+                :: divideFrame (b :: tl)
+  in
   case f of
     FrameFrame l ->
-      List.map (frame t) l
+      divideFrame l
     WindowFrame l ->
       List.map (window w h) l
 
@@ -28,14 +46,14 @@ frame : Tile -> Frame -> Html Msg
 frame t f =
   case f of
     Frame {width, height} o Horiz c ->
-      div [ frameStyle width height t o "row" [ "background-color" => "#f00" ] ]
+      div [ frameStyle width height t o "row" [] ]
         (frameChildren width height Horiz c)
         -- ( List.intersperse
-        --     (div [ style [ "display" => "inline-block", "width" => "2px", "background" => "red", "cursor" => "ew-resize" ] ] [])
-        --     (frameChildren (w // 2) h Horiz c)
+        --     (div [ style [ "display" => "inline-block", "width" => "2px", "background" => "#ff0", "cursor" => "ew-resize" ] ] [])
+        --     (frameChildren width height Horiz c)
         -- )
     Frame {width, height} o Vert c ->
-      div [ frameStyle width height t o "column" [ "background-color" => "#0f0" ] ]
+      div [ frameStyle width height t o "column" [] ]
         (frameChildren width height Vert c)
         -- ( List.intersperse
         --     (div [ style [ "height" => "2px", "background" => "blue", "cursor" => "ns-resize" ] ] [])
