@@ -14,3 +14,8 @@ type alias Size =
   { width : Int
   , height : Int
   }
+
+type alias Position =
+  { x : Int
+  , y : Int
+  }

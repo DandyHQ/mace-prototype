@@ -10,6 +10,9 @@ update msg model =
   case msg of
     WindowResize newSize ->
       ( { model | window = newSize, frames = frameResize newSize model.frames }, Cmd.none )
+      
+    _ ->
+      ( model, Cmd.none )
 
 childrenResize : Size -> Size -> Tile -> FrameChildren -> FrameChildren
 childrenResize oldSize newSize t children =

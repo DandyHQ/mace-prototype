@@ -1,5 +1,6 @@
 import Html exposing (program)
 import Model exposing (Model)
+import Mouse
 import Msg exposing (..)
 import Update
 import View
@@ -21,4 +22,13 @@ main =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-  Window.resizes WindowResize
+  case model.drag of
+    Nothing ->
+      Window.resizes WindowResize
+
+    Just _ ->
+      Sub.batch
+        [ Mouse.moves DragAt
+        , Mouse.ups DragEnd
+        , Window.resizes WindowResize
+        ]

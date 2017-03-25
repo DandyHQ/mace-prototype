@@ -9,11 +9,17 @@ type alias Model =
   { nextIndex : Int
   , window : Size
   , frames : Frame
+  , drag : Maybe Drag
+  }
+
+type alias Drag =
+  { start : Position
+  , current : Position
   }
 
 init : ( Model, Cmd Msg )
 init =
-  ( Model 2 (Window.Size 600 600) initialLayout, Task.perform Msg.WindowResize Window.size )
+  ( Model 2 (Window.Size 600 600) initialLayout Nothing, Task.perform Msg.WindowResize Window.size )
 
 initialLayout : Frame
 initialLayout =
