@@ -21,6 +21,7 @@ type alias Position =
   }
 
 type alias Drag =
-  { start : Position
+  { frame : Frame
+  , start : Position
   , current : Position
   }

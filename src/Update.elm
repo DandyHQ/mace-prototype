@@ -8,17 +8,55 @@ import Window
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
   case msg of
-    DragStart xy ->
-      ( { model | drag = Just (Drag xy xy) }, Cmd.none )
+    DragStart f xy ->
+      ( { model | drag = Just (Drag f xy xy) }, Cmd.none )
 
     DragAt xy ->
-      ( { model | drag = Maybe.map (\{start} -> Drag start xy) model.drag }, Cmd.none )
+      ( { model | drag = Maybe.map (\{frame, current} -> Drag frame current xy) model.drag }, Cmd.none )
 
     DragEnd _ ->
       ( { model | drag = Nothing }, Cmd.none )
 
     WindowResize newSize ->
       ( { model | window = newSize, frames = frameResize newSize model.frames }, Cmd.none )
+
+
+moveFrame : Maybe Drag -> Frame -> Frame
+moveFrame d f =
+  let
+    moveFrame_ f =
+      case f of
+        Frame size offset t children ->
+          case children of
+            WindowFrame _ ->
+              Frame size offset t children
+            FrameFrame l ->
+              Frame size offset t (FrameFrame (moveChildren t l))
+
+    moveChildren tile l =
+      case l of
+        [] -> []
+        hd :: [] ->
+          hd :: []
+        a :: b :: tl ->
+          -- Refactor so d isn't maybe
+          case d of
+            Nothing ->
+              a :: b :: moveChildren tile tl
+            Just {frame, start, current} ->
+              if frame == a then
+                case a of
+                  Frame {width, height} o t children ->
+                    Frame (Size (width + 100) height) o t children
+                ::
+                case b of
+                  Frame {width, height} o t children ->
+                    Frame (Size (width - 100) height) (o + 100) t children
+                :: tl
+              else
+                a :: b :: moveChildren tile tl
+  in
+  moveFrame_ f
 
 
 childrenResize : Size -> Size -> Tile -> FrameChildren -> FrameChildren

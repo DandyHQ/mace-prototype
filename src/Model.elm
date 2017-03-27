@@ -12,11 +12,6 @@ type alias Model =
   , drag : Maybe Drag
   }
 
-type alias Drag =
-  { start : Position
-  , current : Position
-  }
-
 init : ( Model, Cmd Msg )
 init =
   ( Model 2 (Window.Size 600 600) initialLayout Nothing, Task.perform Msg.WindowResize Window.size )

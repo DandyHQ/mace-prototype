@@ -32,8 +32,8 @@ frameChildren w h t f =
               frame t a
                 ::
                   (case t of
-                    Horiz -> div [ onMouseDown, style [ "z-index" => "1000", "position" => "absolute", "width" => "2px", "height" => "100%", "background-color" => "#ff0", "cursor" => "ew-resize", "left" => (toString (o - 2) ++ "px") ] ] []
-                    Vert -> div [ onMouseDown, style [ "z-index" => "1000", "position" => "absolute", "width" => "100%", "height" => "2px", "background-color" => "#ff0", "cursor" => "ns-resize", "top" => (toString (o - 2) ++ "px") ] ] []
+                    Horiz -> div [ onMouseDown a, style [ "z-index" => "1000", "position" => "absolute", "width" => "2px", "height" => "100%", "background-color" => "#ff0", "cursor" => "ew-resize", "left" => (toString (o - 2) ++ "px") ] ] []
+                    Vert -> div [ onMouseDown a, style [ "z-index" => "1000", "position" => "absolute", "width" => "100%", "height" => "2px", "background-color" => "#ff0", "cursor" => "ns-resize", "top" => (toString (o - 2) ++ "px") ] ] []
                     None -> div [] []
                   )
                 :: divideFrame (b :: tl)
@@ -50,17 +50,9 @@ frame t f =
     Frame {width, height} o Horiz c ->
       div [ frameStyle width height t o "row" [] ]
         (frameChildren width height Horiz c)
-        -- ( List.intersperse
-        --     (div [ style [ "display" => "inline-block", "width" => "2px", "background" => "#ff0", "cursor" => "ew-resize" ] ] [])
-        --     (frameChildren width height Horiz c)
-        -- )
     Frame {width, height} o Vert c ->
       div [ frameStyle width height t o "column" [] ]
         (frameChildren width height Vert c)
-        -- ( List.intersperse
-        --     (div [ style [ "height" => "2px", "background" => "blue", "cursor" => "ns-resize" ] ] [])
-        --     (frameChildren w (h // 2) Vert c)
-        -- )
     Frame {width, height} o None c ->
       div [ frameStyle width height t o "row" [ "background-color" => "#fff" ] ]
         ( frameChildren width height None c)
@@ -70,9 +62,9 @@ window w h f =
   text "w "
 
 
-onMouseDown : Attribute Msg
-onMouseDown =
-  on "mousedown" (Decode.map Msg.DragStart Mouse.position)
+onMouseDown : Frame -> Attribute Msg
+onMouseDown f =
+  on "mousedown" (Decode.map (Msg.DragStart f) Mouse.position)
 
 -- STYLES
 

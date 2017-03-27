@@ -5,6 +5,6 @@ import Window
 
 type Msg
   = WindowResize Window.Size
-  | DragStart Position
+  | DragStart Frame Position
   | DragAt Position
   | DragEnd Position
