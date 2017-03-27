@@ -1,10 +1,12 @@
 module View exposing (view)
 
 import Array
+import Json.Decode as Decode
 import Html exposing (..)
 import Html.Attributes exposing (style)
-import Html.Events exposing (onClick)
+import Html.Events exposing (onClick, on)
 import Model exposing (Model)
+import Mouse exposing (Position)
 import Msg exposing (Msg)
 import Types exposing (..)
 
@@ -30,8 +32,8 @@ frameChildren w h t f =
               frame t a
                 ::
                   (case t of
-                    Horiz -> div [ style [ "z-index" => "1000", "position" => "absolute", "width" => "2px", "height" => "100%", "background-color" => "#ff0", "cursor" => "ew-resize", "left" => (toString (o - 2) ++ "px") ] ] []
-                    Vert -> div [ style [ "z-index" => "1000", "position" => "absolute", "width" => "100%", "height" => "2px", "background-color" => "#ff0", "cursor" => "ns-resize", "top" => (toString (o - 2) ++ "px") ] ] []
+                    Horiz -> div [ onMouseDown, style [ "z-index" => "1000", "position" => "absolute", "width" => "2px", "height" => "100%", "background-color" => "#ff0", "cursor" => "ew-resize", "left" => (toString (o - 2) ++ "px") ] ] []
+                    Vert -> div [ onMouseDown, style [ "z-index" => "1000", "position" => "absolute", "width" => "100%", "height" => "2px", "background-color" => "#ff0", "cursor" => "ns-resize", "top" => (toString (o - 2) ++ "px") ] ] []
                     None -> div [] []
                   )
                 :: divideFrame (b :: tl)
@@ -67,6 +69,10 @@ window : Int -> Int -> Window -> Html Msg
 window w h f =
   text "w "
 
+
+onMouseDown : Attribute Msg
+onMouseDown =
+  on "mousedown" (Decode.map Msg.DragStart Mouse.position)
 
 -- STYLES
 

@@ -8,11 +8,18 @@ import Window
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
   case msg of
+    DragStart xy ->
+      ( { model | drag = Just (Drag xy xy) }, Cmd.none )
+
+    DragAt xy ->
+      ( { model | drag = Maybe.map (\{start} -> Drag start xy) model.drag }, Cmd.none )
+
+    DragEnd _ ->
+      ( { model | drag = Nothing }, Cmd.none )
+
     WindowResize newSize ->
       ( { model | window = newSize, frames = frameResize newSize model.frames }, Cmd.none )
-      
-    _ ->
-      ( model, Cmd.none )
+
 
 childrenResize : Size -> Size -> Tile -> FrameChildren -> FrameChildren
 childrenResize oldSize newSize t children =

@@ -19,3 +19,8 @@ type alias Position =
   { x : Int
   , y : Int
   }
+
+type alias Drag =
+  { start : Position
+  , current : Position
+  }
