@@ -8,8 +8,7 @@ import Window
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
   case msg of
-    _ ->
-      ( model,  Cmd.none )
+
     -- DragStart f xy ->
     --   ( { model | drag = Just (Drag f xy xy) }, Cmd.none )
     --
@@ -19,8 +18,52 @@ update msg model =
     -- DragEnd _ ->
     --   ( { model | drag = Nothing }, Cmd.none )
     --
-    -- WindowResize newSize ->
-    --   ( { model | window = newSize, frames = frameResize newSize model.frames }, Cmd.none )
+    WindowResize newSize ->
+      ( { model | window = newSize, frames = resizeFrame model.window newSize None model.frames }, Cmd.none )
+
+    _ ->
+      ( model,  Cmd.none )
+
+-- resizeChildren : Size -> Size -> Tile -> List Frame -> List (Html Msg)
+-- resizeChildren size rem tile l =
+--   case l of
+--     [] -> []
+--     hd :: [] ->
+--       frame (Position (size.width - rem.width) (size.height - rem.height)) rem tile hd :: []
+--     hd :: tl ->
+--       frame (Position (size.width - rem.width) (size.height - rem.height)) rem tile hd
+--         :: case tile of
+--           Horiz ->
+--             frameChildren size (Size (size.width - (getSize size tile hd).width - 2) size.height) tile tl
+--           Vert ->
+--             frameChildren size (Size size.width (size.height - (getSize size tile hd).height - 2)) tile tl
+--           -- any remaining cases are the result of an invalid tree
+--           _ ->
+--             frameChildren size rem tile tl
+
+resizeFrame : Size -> Size -> Tile -> Frame -> Frame
+resizeFrame oldSize newSize tile f =
+  case f of
+    Frame s t c ->
+      Frame (resize oldSize newSize tile f) t
+        (case c of
+          FrameFrame l ->
+            FrameFrame l
+          WindowFrame l ->
+            WindowFrame l
+        )
+
+resize : Size -> Size -> Tile -> Frame -> Int
+resize oldSize newSize tile f =
+  case f of
+    Frame s _ _ ->
+      case tile of
+        None ->
+          newSize.width
+        Horiz ->
+          round (toFloat newSize.width / toFloat oldSize.width * toFloat s)
+        Vert ->
+          round (toFloat newSize.height / toFloat oldSize.height * toFloat s)
 
 --
 -- moveFrame : Maybe Drag -> Frame -> Frame
