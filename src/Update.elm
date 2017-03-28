@@ -19,51 +19,56 @@ update msg model =
     --   ( { model | drag = Nothing }, Cmd.none )
     --
     WindowResize newSize ->
-      ( { model | window = newSize, frames = resizeFrame model.window newSize None model.frames }, Cmd.none )
+      ( { model | window = newSize, frames = resize model.window newSize model.frames }, Cmd.none )
 
     _ ->
       ( model,  Cmd.none )
 
--- resizeChildren : Size -> Size -> Tile -> List Frame -> List (Html Msg)
--- resizeChildren size rem tile l =
---   case l of
---     [] -> []
---     hd :: [] ->
---       frame (Position (size.width - rem.width) (size.height - rem.height)) rem tile hd :: []
---     hd :: tl ->
---       frame (Position (size.width - rem.width) (size.height - rem.height)) rem tile hd
---         :: case tile of
---           Horiz ->
---             frameChildren size (Size (size.width - (getSize size tile hd).width - 2) size.height) tile tl
---           Vert ->
---             frameChildren size (Size size.width (size.height - (getSize size tile hd).height - 2)) tile tl
---           -- any remaining cases are the result of an invalid tree
---           _ ->
---             frameChildren size rem tile tl
+resizeChildren : (Int -> Int) -> (Int -> Int) -> Size -> Size -> Tile -> List Frame -> List Frame
+resizeChildren hScale vScale newSize rem tile l =
+  case l of
+    [] -> []
+    hd :: [] ->
+      resizeFrame hScale vScale rem tile hd :: []
+    hd :: tl ->
+      hd :: tl
+      -- case tile of
+      --   Horiz ->
+      --     resizeFrame hScale vScale (hScale hd)
+      --     frameChildren size (Size (size.width - (getSize size tile hd).width - 2) size.height) tile tl
+      --   Vert ->
+      --     frameChildren size (Size size.width (size.height - (getSize size tile hd).height - 2)) tile tl
+      --   -- any remaining cases are the result of an invalid tree
+      --   _ ->
+      --     frameChildren size rem tile tl
 
-resizeFrame : Size -> Size -> Tile -> Frame -> Frame
-resizeFrame oldSize newSize tile f =
+resizeFrame : (Int -> Int) -> (Int -> Int) -> Size -> Tile -> Frame -> Frame
+resizeFrame hScale vScale newSize tile f =
   case f of
     Frame s t c ->
-      Frame (resize oldSize newSize tile f) t
+      Frame (if tile == Vert then newSize.height else newSize.width) t
         (case c of
           FrameFrame l ->
-            FrameFrame l
+            FrameFrame (resizeChildren hScale vScale newSize newSize tile l)
           WindowFrame l ->
             WindowFrame l
         )
+-- XXX
+-- resize function, builds hScale and vScale. Passes it down
+-- applied to children, leaving rem
+-- resizeFrame just takes a new size and applies it
+hScale : Size -> Size -> Int -> Int
+hScale oldSize newSize s =
+  round (toFloat newSize.width / toFloat oldSize.width * toFloat s)
 
-resize : Size -> Size -> Tile -> Frame -> Int
-resize oldSize newSize tile f =
-  case f of
-    Frame s _ _ ->
-      case tile of
-        None ->
-          newSize.width
-        Horiz ->
-          round (toFloat newSize.width / toFloat oldSize.width * toFloat s)
-        Vert ->
-          round (toFloat newSize.height / toFloat oldSize.height * toFloat s)
+vScale : Size -> Size -> Int -> Int
+vScale oldSize newSize s =
+  round (toFloat newSize.height / toFloat oldSize.height * toFloat s)
+
+resize : Size -> Size -> Frame -> Frame
+resize oldSize newSize f =
+  resizeFrame (hScale oldSize newSize) (vScale oldSize newSize) newSize None f
+
 
 --
 -- moveFrame : Maybe Drag -> Frame -> Frame
