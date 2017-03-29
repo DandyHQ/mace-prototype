@@ -25,6 +25,9 @@ frameChildren size rem tile l =
       frame (Position (size.width - rem.width) (size.height - rem.height)) rem tile hd :: []
     hd :: tl ->
       frame (Position (size.width - rem.width) (size.height - rem.height)) rem tile hd
+        -- add the border in
+        :: div [ borderStyle (pos_of_size (getSize (Size (size.width - rem.width) (size.height - rem.height)) tile hd)) tile ] []
+        -- and the remaining frames
         :: case tile of
           Horiz ->
             frameChildren size (Size (size.width - (getSize size tile hd).width - 1) size.height) tile tl
@@ -58,6 +61,10 @@ getSize size tile f =
         Vert ->
           Size size.width s
 
+pos_of_size : Size -> Position
+pos_of_size size =
+  Position size.width size.height
+
 frameStyle : Position -> Size -> Tile -> Attribute Msg
 frameStyle pos size tile =
   style
@@ -68,3 +75,14 @@ frameStyle pos size tile =
     , "height" => (toString size.height ++ "px")
     , "vertical-align" => "top"
     ] ++ if tile == None then ["background-color" => "#fff"] else [])
+
+borderStyle : Position -> Tile -> Attribute Msg
+borderStyle pos tile =
+  style
+    [ "position" => "absolute"
+    , "left" => (toString (pos.x - if tile == Horiz then 1 else 0) ++ "px")
+    , "top" => (toString (pos.y - if tile == Vert then 1 else 0) ++ "px")
+    , "width" => if tile == Horiz then "3px" else "100%"
+    , "height" => if tile == Vert then "3px" else "100%"
+    , "cursor" => if tile == Horiz then "ew-resize" else "ns-resize"
+    ]
