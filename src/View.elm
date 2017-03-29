@@ -14,7 +14,7 @@ import Types exposing (..)
 
 view : Model -> Html Msg
 view model =
-  div [ style [ "width" => "100%", "height" => "100%", "background-color" => "#aaa" ] ]
+  div [ style [ "width" => "100%", "height" => "100%", "background-color" => "#c6c6c6" ] ]
     [ frame (Position 0 0) model.window None model.frames ]
 
 frameChildren : Size -> Size -> Tile -> List Frame -> List (Html Msg)
@@ -27,9 +27,9 @@ frameChildren size rem tile l =
       frame (Position (size.width - rem.width) (size.height - rem.height)) rem tile hd
         :: case tile of
           Horiz ->
-            frameChildren size (Size (size.width - (getSize size tile hd).width - 2) size.height) tile tl
+            frameChildren size (Size (size.width - (getSize size tile hd).width - 1) size.height) tile tl
           Vert ->
-            frameChildren size (Size size.width (size.height - (getSize size tile hd).height - 2)) tile tl
+            frameChildren size (Size size.width (size.height - (getSize size tile hd).height - 1)) tile tl
           -- any remaining cases are the result of an invalid tree
           _ ->
             frameChildren size rem tile tl

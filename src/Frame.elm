@@ -13,10 +13,10 @@ resizeChildren hScale vScale newSize rem tile l =
       case tile of
         Horiz ->
           resizeFrame hScale vScale (hScale hd) tile hd
-          :: resizeChildren hScale vScale newSize (Size (newSize.width - (hScale hd).width - 2) newSize.height) tile tl
+          :: resizeChildren hScale vScale newSize (Size (newSize.width - (hScale hd).width - 1) newSize.height) tile tl
         Vert ->
            resizeFrame hScale vScale (vScale hd) tile hd
-           :: resizeChildren hScale vScale newSize (Size newSize.width (newSize.height - (vScale hd).height - 2)) tile tl
+           :: resizeChildren hScale vScale newSize (Size newSize.width (newSize.height - (vScale hd).height - 1)) tile tl
         -- any remaining cases are the result of an invalid tree
         _ ->
           resizeChildren hScale vScale newSize rem tile tl
