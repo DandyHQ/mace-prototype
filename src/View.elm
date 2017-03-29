@@ -6,6 +6,7 @@ import Html exposing (..)
 import Html.Attributes exposing (style)
 import Html.Events exposing (onClick, on)
 import Model exposing (Model)
+import Mouse
 import Msg exposing (Msg)
 import Types exposing (..)
 
@@ -26,7 +27,7 @@ frameChildren size rem tile l =
     hd :: tl ->
       frame (Position (size.width - rem.width) (size.height - rem.height)) rem tile hd
         -- add the border in
-        :: div [ borderStyle (pos_of_size (getSize (Size (size.width - rem.width) (size.height - rem.height)) tile hd)) tile ] []
+        :: div [ onMouseDown hd, borderStyle (pos_of_size (getSize (Size (size.width - rem.width) (size.height - rem.height)) tile hd)) tile ] []
         -- and the remaining frames
         :: case tile of
           Horiz ->
@@ -48,6 +49,11 @@ frame pos size tile f =
           WindowFrame l ->
             [div [] [ text "Hello, World" ]]
         )
+
+
+onMouseDown : Frame -> Attribute Msg
+onMouseDown f =
+  on "mousedown" (Decode.map (Msg.DragStart f) Mouse.position)
 
 getSize : Size -> Tile -> Frame -> Size
 getSize size tile f =
