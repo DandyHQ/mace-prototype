@@ -1,6 +1,10 @@
 # mace-prototype
 Web based prototype for the planned Mace text editor
 
+## Live Demo
+
+Available at https://github.com/DandyHQ/mace-prototype
+
 ## Building
 
 Requires Elm 0.18
