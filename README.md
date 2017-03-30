@@ -3,7 +3,7 @@ Web based prototype for the planned Mace text editor
 
 ## Live Demo
 
-Available at https://github.com/DandyHQ/mace-prototype
+Available at https://dandyhq.github.io/mace-prototype/
 
 ## Building
 
