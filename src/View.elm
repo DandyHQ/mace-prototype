@@ -48,9 +48,26 @@ frame pos size tile f =
           FrameFrame l ->
             frameChildren (getSize size tile f) (getSize size tile f) t l
           WindowFrame l ->
-            [div [] [ text "Hello, World" ]]
+            window l
         )
 
+window : List Window -> List (Html Msg)
+window l =
+  let
+    window_ l =
+      case l of
+        [] -> []
+        hd :: tl ->
+          case hd of
+            Window id ->
+              div [ tabStyle ] [ text ("Window " ++ toString id) ] :: window_ tl
+  in
+  [div []
+    (window_ l)
+  ]
+
+
+-- HELPERS
 
 onMouseDown : Frame -> Attribute Msg
 onMouseDown f =
@@ -71,6 +88,17 @@ getSize size tile f =
 pos_of_size : Size -> Position
 pos_of_size size =
   Position size.width size.height
+
+
+-- STYLES
+
+tabStyle : Attribute Msg
+tabStyle =
+  style
+    [ "border" => "1px solid black"
+    , "display" => "inline-block"
+    , "width" => "200px"
+    ]
 
 frameStyle : Position -> Size -> Tile -> Attribute Msg
 frameStyle pos size tile =
