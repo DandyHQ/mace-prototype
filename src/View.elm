@@ -1,10 +1,11 @@
 module View exposing (view)
 
 import Array
-import Json.Decode as Decode
+import Frame
 import Html exposing (..)
 import Html.Attributes exposing (style)
 import Html.Events exposing (onClick, on)
+import Json.Decode as Decode
 import Model exposing (Model)
 import Mouse
 import Msg exposing (Msg)
@@ -16,7 +17,7 @@ import Types exposing (..)
 view : Model -> Html Msg
 view model =
   div [ style [ "width" => "100%", "height" => "100%", "background-color" => "#c6c6c6" ] ]
-    [ frame (Position 0 0) model.window None model.frames ]
+    [ frame (Position 0 0) model.window None (Frame.resize model.drag model.frames) ]
 
 frameChildren : Size -> Size -> Tile -> List Frame -> List (Html Msg)
 frameChildren size rem tile l =

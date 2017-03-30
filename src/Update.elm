@@ -20,4 +20,4 @@ update msg model =
       ( { model | drag = Maybe.map (\{frame, start} -> Drag frame start xy) model.drag }, Cmd.none )
 
     DragEnd _ ->
-      ( { model | drag = Nothing }, Cmd.none )
+      ( { model | drag = Nothing, frames = Frame.resize model.drag model.frames }, Cmd.none )
