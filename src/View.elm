@@ -16,7 +16,7 @@ import Types exposing (..)
 
 view : Model -> Html Msg
 view model =
-  div [ style [ "width" => "100%", "height" => "100%", "background-color" => "#c6c6c6" ] ]
+  div [ style [ "width" => "100%", "height" => "100%" ] ]
     [ frame (Position 0 0) model.window None (Frame.resize model.drag model.frames) ]
 
 frameChildren : Size -> Size -> Tile -> List Frame -> List (Html Msg)
@@ -98,7 +98,7 @@ pos_of_size size =
 tabStyle : Bool -> Attribute Msg
 tabStyle visible =
   style
-    ([ "border-bottom" => if visible then "none" else "1px solid #c6c6c6"
+    ([ "border-bottom" => if visible then "1px solid #f1f1f1" else "1px solid #c6c6c6"
     , "margin-top" => "5px"
     , "display" => "inline-block"
     , "width" => "200px"
@@ -120,13 +120,14 @@ tabStyle visible =
 frameStyle : Position -> Size -> Tile -> Attribute Msg
 frameStyle pos size tile =
   style
-    ([ "position" => "absolute"
+    [ "position" => "absolute"
     , "left" => (toString pos.x ++ "px")
     , "top" => (toString pos.y ++ "px")
     , "width" => (toString size.width ++ "px")
     , "height" => (toString size.height ++ "px")
     , "vertical-align" => "top"
-    ] ++ if tile == None then ["background-color" => "#fff"] else [])
+    , "background-color" => if tile == None then "#fff" else "#c6c6c6"
+    ]
 
 borderStyle : Position -> Tile -> Attribute Msg
 borderStyle pos tile =
