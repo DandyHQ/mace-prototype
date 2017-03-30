@@ -1,8 +1,11 @@
 language: node_js
 node_js: node
 
-before_script:
+install:
   - npm install -g elm
+
+script:
+  - elm make src/Main.elm --output=index.html
 
 deploy:
   provider: pages
