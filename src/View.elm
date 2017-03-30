@@ -54,18 +54,36 @@ frame pos size tile f =
 window : List Window -> List (Html Msg)
 window l =
   let
+    findVisible l =
+      case l of
+        [] -> Nothing
+        hd :: tl ->
+          case hd of
+            Window _ _ visible _ ->
+              if visible then
+                Just hd
+              else
+                findVisible tl
     window_ l =
       case l of
         [] -> []
         hd :: tl ->
           case hd of
-            Window id focused visible ->
+            Window id focused visible contents ->
               div [ tabStyle visible] [ text ("Window " ++ toString id) ] :: window_ tl
   in
   [div []
     [ div [ style ["background-color" => "#e7e7e7"] ] (window_ l)
     , div [ style ["background-color" => "#f1f1f1", "color" => "#4c4c4c"] ] [ text "New Cut Snarf Paste Eval" ]
-    , div [] []
+    , div []
+      [ text (
+      case findVisible l of
+        Nothing -> ""
+        Just w ->
+          case w of
+            Window _ _ _ contents ->
+              contents
+      )]
     ]
   ]
 

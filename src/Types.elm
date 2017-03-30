@@ -1,7 +1,7 @@
 module Types exposing (..)
 
--- Window ID Focused Visible
-type Window = Window Int Bool Bool
+-- Window ID Focused Visible Contents
+type Window = Window Int Bool Bool String
 
 -- Frame Size TileStyle (List Children)
 type Frame = Frame Int Tile FrameChildren
