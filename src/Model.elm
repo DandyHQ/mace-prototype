@@ -19,16 +19,16 @@ initialLayout : Frame
 initialLayout =
   Frame 600 Horiz ( FrameFrame
     [ Frame 299 None ( WindowFrame
-        [ Window 1
-        , Window 2
+        [ Window 1 True True
+        , Window 2 False False
         ])
     , Frame 299 Vert ( FrameFrame
         [ Frame 299 None
-            ( WindowFrame [ Window 3 ] )
+            ( WindowFrame [ Window 3 False True ] )
         , Frame 299 None ( WindowFrame
-            [ Window 4
-            , Window 5
-            , Window 6
+            [ Window 4 False False
+            , Window 5 False True
+            , Window 6 False False
             ])
         ])
     ])

@@ -59,11 +59,14 @@ window l =
         [] -> []
         hd :: tl ->
           case hd of
-            Window id ->
-              div [ tabStyle ] [ text ("Window " ++ toString id) ] :: window_ tl
+            Window id focused visible ->
+              div [ tabStyle visible] [ text ("Window " ++ toString id) ] :: window_ tl
   in
   [div []
-    (window_ l)
+    [ div [ style ["background-color" => "#e7e7e7"] ] (window_ l)
+    , div [ style ["background-color" => "#f1f1f1", "color" => "#4c4c4c"] ] [ text "New Cut Snarf Paste Eval" ]
+    , div [] []
+    ]
   ]
 
 
@@ -92,13 +95,27 @@ pos_of_size size =
 
 -- STYLES
 
-tabStyle : Attribute Msg
-tabStyle =
+tabStyle : Bool -> Attribute Msg
+tabStyle visible =
   style
-    [ "border" => "1px solid black"
+    ([ "border-bottom" => if visible then "none" else "1px solid #c6c6c6"
+    , "margin-top" => "5px"
     , "display" => "inline-block"
     , "width" => "200px"
-    ]
+    , "height" => "30px"
+    , "line-height" => "30px"
+    , "text-align" => "center"
+    , "color" => if visible then "#4c4c4c" else "#818181"
+    , "background-color" => if visible then "#f1f1f1" else "#e7e7e7"
+    ] ++
+      if visible then
+        [ "border-top" => "1px solid #c6c6c6"
+        , "border-right" => "1px solid #c6c6c6"
+        , "border-left" => "1px solid #c6c6c6"
+        , "border-radius" => "5px 5px 0 0"
+        ]
+      else
+        [])
 
 frameStyle : Position -> Size -> Tile -> Attribute Msg
 frameStyle pos size tile =
