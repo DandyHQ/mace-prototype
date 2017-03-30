@@ -3,6 +3,7 @@ node_js: node
 
 install:
   - npm install -g elm
+  - elm package install -y
 
 script:
   - elm make src/Main.elm --output=index.html
