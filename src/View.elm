@@ -55,15 +55,8 @@ window : List Window -> List (Html Msg)
 window l =
   let
     findVisible l =
-      case l of
-        [] -> Nothing
-        hd :: tl ->
-          case hd of
-            Window _ _ visible _ ->
-              if visible then
-                Just hd
-              else
-                findVisible tl
+      List.head
+        ( List.filter (\v -> case v of Window _ _ visible _ -> visible) l )
     window_ l =
       case l of
         [] -> []
