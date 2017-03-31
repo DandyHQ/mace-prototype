@@ -1,4 +1,4 @@
-module Frame exposing (resizeAll, resize)
+module Frame exposing (resizeAll, resize, focus)
 
 import Types exposing (..)
 
@@ -103,3 +103,33 @@ resize drag frame =
     Nothing -> frame
     Just d ->
       resizeFrame_ d frame
+
+
+{- focuses a window from the current frame group -}
+focus : Window -> Frame -> Frame
+focus window frame =
+  let
+    frameChildren_ l =
+      List.map frame_ l
+    unsetVisible l =
+      List.map (\v -> case v of Window id focused visible contents -> Window id False False contents) l
+    setVisible l =
+      List.map
+        (\v -> case v of Window id focused visible contents -> Window id (window == v) (window == v) contents) l
+    frame_ f =
+      case f of
+        Frame s t c ->
+          case c of
+            FrameFrame l ->
+              Frame s t (FrameFrame (frameChildren_ l))
+            WindowFrame l ->
+              let
+                unset = unsetVisible l
+                set = setVisible unset
+              in
+                if set /= unset then
+                  Frame s t (WindowFrame set)
+                else
+                  f
+  in
+    frame_ frame

@@ -13,6 +13,9 @@ update msg model =
     WindowResize newSize ->
       ( { model | window = newSize, frames = Frame.resizeAll model.window newSize model.frames }, Cmd.none )
 
+    FocusTab window ->
+      ( { model | frames = Frame.focus window model.frames }, Cmd.none )
+
     DragStart f xy ->
       ( { model | drag = Just (Drag f xy xy) }, Cmd.none )
 

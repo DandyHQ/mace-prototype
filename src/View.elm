@@ -63,7 +63,7 @@ window size l =
         hd :: tl ->
           case hd of
             Window id focused visible contents ->
-              div [ tabStyle visible] [ text ("Window " ++ toString id) ] :: window_ tl
+              div [ tabStyle visible, onClick (Msg.FocusTab hd) ] [ text ("Window " ++ toString id) ] :: window_ tl
   in
   [div [ style ["width" => (toString size.width ++ "px"), "height" => (toString size.height ++ "px")] ]
     [ div [ style ["height" => "37px", "background-color" => "#e7e7e7"] ] (window_ l)
@@ -125,6 +125,7 @@ tabStyle visible =
     , "text-align" => "center"
     , "color" => if visible then "#4c4c4c" else "#818181"
     , "background-color" => if visible then "#f1f1f1" else "#e7e7e7"
+    , "cursor" => "default"
     ] ++
       if visible then
         [ "border-top" => "1px solid #c6c6c6"
