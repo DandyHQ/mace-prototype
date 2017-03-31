@@ -3,7 +3,7 @@ module View exposing (view)
 import Array
 import Frame
 import Html exposing (..)
-import Html.Attributes exposing (style)
+import Html.Attributes exposing (style, value)
 import Html.Events exposing (onClick, on)
 import Json.Decode as Decode
 import Model exposing (Model)
@@ -48,11 +48,11 @@ frame pos size tile f =
           FrameFrame l ->
             frameChildren (getSize size tile f) (getSize size tile f) t l
           WindowFrame l ->
-            window l
+            window (getSize size tile f) l
         )
 
-window : List Window -> List (Html Msg)
-window l =
+window : Size -> List Window -> List (Html Msg)
+window size l =
   let
     findVisible l =
       List.head
@@ -65,18 +65,25 @@ window l =
             Window id focused visible contents ->
               div [ tabStyle visible] [ text ("Window " ++ toString id) ] :: window_ tl
   in
-  [div []
-    [ div [ style ["background-color" => "#e7e7e7"] ] (window_ l)
-    , div [ style ["background-color" => "#f1f1f1", "color" => "#4c4c4c"] ] [ text "New Cut Snarf Paste Eval" ]
-    , div []
-      [ text (
-      case findVisible l of
-        Nothing -> ""
-        Just w ->
-          case w of
-            Window _ _ _ contents ->
-              contents
-      )]
+  [div [ style ["width" => (toString size.width ++ "px"), "height" => (toString size.height ++ "px")] ]
+    [ div [ style ["height" => "37px", "background-color" => "#e7e7e7"] ] (window_ l)
+    , div [ style ["height" => "25px", "line-height" => "25px", "background-color" => "#f1f1f1", "color" => "#4c4c4c"] ] [ text "New Cut Snarf Paste Eval" ]
+    , textarea  [ style
+                    [ "width" => (toString size.width ++ "px")
+                    , "height" => (toString (size.height - 37 - 25) ++ "px")
+                    , "border" => "0"
+                    , "margin" => "0"
+                    , "padding" => "0"
+                    , "overflow" => "auto"
+                    , "resize" => "none"
+                    ] ]
+        [ text (case findVisible l of
+          Nothing -> ""
+          Just w ->
+            case w of
+              Window _ _ _ contents ->
+                contents
+        )]
     ]
   ]
 
