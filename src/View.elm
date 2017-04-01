@@ -17,7 +17,8 @@ import Types exposing (..)
 view : Model -> Html Msg
 view model =
   div [ style [ "width" => "100%", "height" => "100%" ] ]
-    [ frame (Position 0 0) model.window None (Frame.resize model.resizeDrag model.frames) ]
+    [ frame (Position 0 0) model.window None (Frame.resize model.resizeDrag model.frames)
+    , windowDrag model.moveDrag ]
 
 frameChildren : Size -> Size -> Tile -> List Frame -> List (Html Msg)
 frameChildren size rem tile l =
@@ -87,6 +88,14 @@ window size l =
     ]
   ]
 
+
+windowDrag : Maybe MoveDrag -> Html Msg
+windowDrag drag =
+  case drag of
+    Nothing -> div [] []
+    Just d ->
+      div [ style [ "position" => "absolute", "top" => (toString d.current.y ++ "px"), "left" => (toString d.current.x ++ "px") ] ]
+        [ text "hello" ]
 
 -- HELPERS
 
