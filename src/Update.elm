@@ -19,8 +19,18 @@ update msg model =
     ResizeStart f xy ->
       ( { model | resizeDrag = Just (ResizeDrag f xy xy) }, Cmd.none )
 
-    ResizeAt xy ->
-      ( { model | resizeDrag = Maybe.map (\{frame, start} -> ResizeDrag frame start xy) model.resizeDrag }, Cmd.none )
+    MoveStart w xy ->
+      ( { model | moveDrag = Just (MoveDrag w xy xy) }, Cmd.none )
 
-    ResizeEnd _ ->
-      ( { model | resizeDrag = Nothing, frames = Frame.resize model.resizeDrag model.frames }, Cmd.none )
+    DragAt xy ->
+      ( { model
+          | resizeDrag = Maybe.map (\{frame, start} -> ResizeDrag frame start xy) model.resizeDrag
+          , moveDrag = Maybe.map (\{window, start} -> MoveDrag window start xy) model.moveDrag
+        }, Cmd.none )
+
+    DragEnd _ ->
+      ( { model
+          | resizeDrag = Nothing
+          , moveDrag = Nothing
+          , frames = if model.resizeDrag /= Nothing then Frame.resize model.resizeDrag model.frames else model.frames
+        }, Cmd.none )

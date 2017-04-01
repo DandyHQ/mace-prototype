@@ -7,5 +7,6 @@ type Msg
   = WindowResize Window.Size
   | FocusTab Window
   | ResizeStart Frame Position
-  | ResizeAt Position
-  | ResizeEnd Position
+  | MoveStart Window Position
+  | DragAt Position
+  | DragEnd Position

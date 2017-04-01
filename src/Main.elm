@@ -22,13 +22,12 @@ main =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-  case model.resizeDrag of
-    Nothing ->
-      Window.resizes WindowResize
-
-    Just _ ->
-      Sub.batch
-        [ Mouse.moves ResizeAt
-        , Mouse.ups ResizeEnd
-        , Window.resizes WindowResize
+  Sub.batch
+    ([Window.resizes WindowResize]
+      ++
+      if model.resizeDrag /= Nothing || model.moveDrag /= Nothing then
+        [ Mouse.moves DragAt
+        , Mouse.ups DragEnd
         ]
+      else []
+    )

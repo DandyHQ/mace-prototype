@@ -28,7 +28,7 @@ frameChildren size rem tile l =
     hd :: tl ->
       frame (Position (size.width - rem.width) (size.height - rem.height)) rem tile hd
         -- add the border in
-        :: div [ onMouseDown hd, borderStyle (pos_of_size (getSize (Size (size.width - rem.width) (size.height - rem.height)) tile hd)) tile ] []
+        :: div [ onMouseDownFrame hd, borderStyle (pos_of_size (getSize (Size (size.width - rem.width) (size.height - rem.height)) tile hd)) tile ] []
         -- and the remaining frames
         :: case tile of
           Horiz ->
@@ -63,7 +63,7 @@ window size l =
         hd :: tl ->
           case hd of
             Window id focused visible contents ->
-              div [ tabStyle visible, onClick (Msg.FocusTab hd) ] [ text ("Window " ++ toString id) ] :: window_ tl
+              div [ tabStyle visible, onClick (Msg.FocusTab hd), onMouseDownWindow hd ] [ text ("Window " ++ toString id) ] :: window_ tl
   in
   [div [ style ["width" => (toString size.width ++ "px"), "height" => (toString size.height ++ "px")] ]
     [ div [ style ["height" => "37px", "background-color" => "#e7e7e7"] ] (window_ l)
@@ -90,8 +90,12 @@ window size l =
 
 -- HELPERS
 
-onMouseDown : Frame -> Attribute Msg
-onMouseDown f =
+onMouseDownWindow : Window -> Attribute Msg
+onMouseDownWindow w =
+  on "mousedown" (Decode.map (Msg.MoveStart w) Mouse.position)
+
+onMouseDownFrame : Frame -> Attribute Msg
+onMouseDownFrame f =
   on "mousedown" (Decode.map (Msg.ResizeStart f) Mouse.position)
 
 getSize : Size -> Tile -> Frame -> Size
