@@ -6,7 +6,7 @@ install:
   - elm package install -y
 
 script:
-  - elm make src/Main.elm --output=index.html
+  - elm make src/Main.elm --output=mace.js
 
 deploy:
   provider: pages
