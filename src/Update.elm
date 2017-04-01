@@ -13,14 +13,16 @@ update msg model =
     WindowResize newSize ->
       ( { model | window = newSize, frames = Frame.resizeAll model.window newSize model.frames }, Cmd.none )
 
-    FocusTab window ->
-      ( { model | frames = Frame.focus window model.frames }, Cmd.none )
-
     ResizeStart f xy ->
       ( { model | resizeDrag = Just (ResizeDrag f xy xy) }, Cmd.none )
 
+    -- having an onMouseDown event snuffs onClick
+    -- so both are handled here
     MoveStart w xy ->
-      ( { model | moveDrag = Just (MoveDrag w xy xy) }, Cmd.none )
+      ( { model
+          | moveDrag = Just (MoveDrag w xy xy)
+          , frames = Frame.focus w model.frames
+        }, Cmd.none )
 
     DragAt xy ->
       ( { model

@@ -64,7 +64,7 @@ window size l =
         hd :: tl ->
           case hd of
             Window id focused visible contents ->
-              div [ tabStyle visible, onClick (Msg.FocusTab hd), onMouseDownWindow hd ] [ text ("Window " ++ toString id) ] :: window_ tl
+              div [ style (tabStyle visible), onMouseDownWindow hd ] [ text ("Window " ++ toString id) ] :: window_ tl
   in
   [div [ style ["width" => (toString size.width ++ "px"), "height" => (toString size.height ++ "px")] ]
     [ div [ style ["height" => "37px", "background-color" => "#e7e7e7"] ] (window_ l)
@@ -94,8 +94,8 @@ windowDrag drag =
   case drag of
     Nothing -> div [] []
     Just d ->
-      div [ style [ "position" => "absolute", "top" => (toString d.current.y ++ "px"), "left" => (toString d.current.x ++ "px") ] ]
-        [ text "hello" ]
+      div [ style (tabStyle True ++ [ "position" => "absolute", "top" => (toString d.current.y ++ "px"), "left" => (toString d.current.x ++ "px") ]) ]
+        [ text ("Window " ++ (case d.window of Window id _ _ _ -> toString id)) ]
 
 -- HELPERS
 
@@ -126,10 +126,9 @@ pos_of_size size =
 
 -- STYLES
 
-tabStyle : Bool -> Attribute Msg
+tabStyle : Bool -> List (String, String)
 tabStyle visible =
-  style
-    ([ "border-bottom" => if visible then "1px solid #f1f1f1" else "1px solid #c6c6c6"
+    [ "border-bottom" => if visible then "1px solid #f1f1f1" else "1px solid #c6c6c6"
     , "margin-top" => "5px"
     , "display" => "inline-block"
     , "width" => "200px"
@@ -139,15 +138,16 @@ tabStyle visible =
     , "color" => if visible then "#4c4c4c" else "#818181"
     , "background-color" => if visible then "#f1f1f1" else "#e7e7e7"
     , "cursor" => "default"
-    ] ++
-      if visible then
-        [ "border-top" => "1px solid #c6c6c6"
-        , "border-right" => "1px solid #c6c6c6"
-        , "border-left" => "1px solid #c6c6c6"
-        , "border-radius" => "5px 5px 0 0"
-        ]
-      else
-        [])
+    ]
+    ++
+    if visible then
+      [ "border-top" => "1px solid #c6c6c6"
+      , "border-right" => "1px solid #c6c6c6"
+      , "border-left" => "1px solid #c6c6c6"
+      , "border-radius" => "5px 5px 0 0"
+      ]
+    else
+      []
 
 frameStyle : Position -> Size -> Tile -> Attribute Msg
 frameStyle pos size tile =

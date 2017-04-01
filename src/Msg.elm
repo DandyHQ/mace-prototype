@@ -5,7 +5,6 @@ import Window
 
 type Msg
   = WindowResize Window.Size
-  | FocusTab Window
   | ResizeStart Frame Position
   | MoveStart Window Position
   | DragAt Position
