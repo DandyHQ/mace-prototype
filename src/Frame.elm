@@ -55,7 +55,7 @@ resizeAll oldSize newSize f =
 
 
 {-| resizes two frames according to the drag on their border -}
-resize : Maybe Drag -> Frame -> Frame
+resize : Maybe ResizeDrag -> Frame -> Frame
 resize drag frame =
   let
     resize_ d t l =

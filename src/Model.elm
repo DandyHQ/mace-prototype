@@ -8,12 +8,13 @@ import Window
 type alias Model =
   { window : Size
   , frames : Frame
-  , drag : Maybe Drag
+  , resizeDrag : Maybe ResizeDrag
+  , moveDrag : Maybe MoveDrag
   }
 
 init : ( Model, Cmd Msg )
 init =
-  ( Model (Window.Size 600 600) initialLayout Nothing, Task.perform Msg.WindowResize Window.size )
+  ( Model (Window.Size 600 600) initialLayout Nothing Nothing, Task.perform Msg.WindowResize Window.size )
 
 initialLayout : Frame
 initialLayout =

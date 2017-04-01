@@ -20,8 +20,14 @@ type alias Position =
   , y : Int
   }
 
-type alias Drag =
+type alias ResizeDrag =
   { frame : Frame
+  , start : Position
+  , current : Position
+  }
+
+type alias MoveDrag =
+  { window : Window
   , start : Position
   , current : Position
   }

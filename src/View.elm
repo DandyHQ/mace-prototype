@@ -17,7 +17,7 @@ import Types exposing (..)
 view : Model -> Html Msg
 view model =
   div [ style [ "width" => "100%", "height" => "100%" ] ]
-    [ frame (Position 0 0) model.window None (Frame.resize model.drag model.frames) ]
+    [ frame (Position 0 0) model.window None (Frame.resize model.resizeDrag model.frames) ]
 
 frameChildren : Size -> Size -> Tile -> List Frame -> List (Html Msg)
 frameChildren size rem tile l =
@@ -92,7 +92,7 @@ window size l =
 
 onMouseDown : Frame -> Attribute Msg
 onMouseDown f =
-  on "mousedown" (Decode.map (Msg.DragStart f) Mouse.position)
+  on "mousedown" (Decode.map (Msg.ResizeStart f) Mouse.position)
 
 getSize : Size -> Tile -> Frame -> Size
 getSize size tile f =
