@@ -94,8 +94,11 @@ windowDrag drag =
   case drag of
     Nothing -> div [] []
     Just d ->
-      div [ style (tabStyle True ++ [ "position" => "absolute", "top" => (toString d.current.y ++ "px"), "left" => (toString d.current.x ++ "px") ]) ]
-        [ text ("Window " ++ (case d.window of Window id _ _ _ -> toString id)) ]
+      if d.moved then
+        div [ style (tabStyle True ++ [ "position" => "absolute", "top" => (toString d.current.y ++ "px"), "left" => (toString d.current.x ++ "px") ]) ]
+          [ text ("Window " ++ (case d.window of Window id _ _ _ -> toString id)) ]
+      else
+        div [] []
 
 -- HELPERS
 

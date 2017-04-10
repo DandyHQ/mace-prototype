@@ -20,14 +20,21 @@ update msg model =
     -- so both are handled here
     MoveStart w xy ->
       ( { model
-          | moveDrag = Just (MoveDrag w xy xy)
+          | moveDrag = Just (MoveDrag w False xy xy)
           , frames = Frame.focus w model.frames
         }, Cmd.none )
 
     DragAt xy ->
       ( { model
           | resizeDrag = Maybe.map (\{frame, start} -> ResizeDrag frame start xy) model.resizeDrag
-          , moveDrag = Maybe.map (\{window, start} -> MoveDrag window start xy) model.moveDrag
+          , moveDrag = Maybe.map (\{window, moved, start} ->
+            MoveDrag window
+              (if moved || (abs (xy.x - start.x)) > 2 || (abs (xy.y - start.y)) > 2 then
+                True
+              else
+                False)
+              start xy
+          ) model.moveDrag
         }, Cmd.none )
 
     DragEnd _ ->

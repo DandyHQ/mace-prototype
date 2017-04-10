@@ -28,6 +28,7 @@ type alias ResizeDrag =
 
 type alias MoveDrag =
   { window : Window
+  , moved : Bool
   , start : Position
   , current : Position
   }
