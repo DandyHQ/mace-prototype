@@ -81,7 +81,7 @@ window size l =
               div [ style (tabStyle visible tabWidth (barWidth - rem)), onMouseDownWindow hd ] [ text ("Window " ++ toString id) ] :: window_ (rem - tabWidth) tl
   in
   [div [ style ["width" => (toString size.width ++ "px"), "height" => (toString size.height ++ "px")] ]
-    [ div [ style ["height" => "35px", "background-color" => "#e7e7e7", "border-bottom" => "1px solid #c6c6c6"] ] (window_ barWidth l) -- last tab is 2px too narrow at full width
+    [ div [ style ["height" => "35px", "background-color" => "#e7e7e7", "border-bottom" => "1px solid #c6c6c6"] ] (window_ barWidth l)
     , div [ style ["height" => "25px", "line-height" => "25px", "background-color" => "#f1f1f1", "color" => "#4c4c4c"] ] [ text "New Cut Snarf Paste Eval" ]
     , textarea  [ style
                     [ "width" => (toString size.width ++ "px")
@@ -158,6 +158,7 @@ tabStyle visible width offset =
     , "color" => if visible then "#4c4c4c" else "#818181"
     , "background-color" => if visible then "#f1f1f1" else "#e7e7e7"
     , "cursor" => "default"
+    , "overflow" => "hidden"
     ]
     ++
     if visible then
