@@ -16,7 +16,7 @@ import Types exposing (..)
 
 view : Model -> Html Msg
 view model =
-  div [ style [ "width" => "100%", "height" => "100%" ] ]
+  div [ pageStyle ]
     [ frame (Position 0 0) model.window None (Frame.resize model.resizeDrag model.frames)
     , windowDrag model.moveDrag ]
 
@@ -170,4 +170,17 @@ borderStyle pos tile =
     , "width" => if tile == Horiz then "3px" else "100%"
     , "height" => if tile == Vert then "3px" else "100%"
     , "cursor" => if tile == Horiz then "ew-resize" else "ns-resize"
+    ]
+
+pageStyle : Attribute Msg
+pageStyle =
+  style
+    [ "width" => "100%"
+    , "height" => "100%"
+    , "-webkit-touch-callout" => "none"
+    , "-webkit-user-select" => "none"
+    , "-khtml-user-select" => "none"
+    , "-moz-user-select" => "none"
+    , "-ms-user-select" => "none"
+    , "user-select" => "none"
     ]
