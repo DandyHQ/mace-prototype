@@ -63,20 +63,25 @@ window size l =
         200
       else
         size.width // List.length l
+    barWidth =
+      if tabWidth * List.length l < size.width - 2 then
+        tabWidth * List.length l
+      else
+        size.width - 2
     window_ rem l =
       case l of
         [] -> []
         hd :: [] ->
           case hd of
             Window id focused visible contents ->
-              div [ style (tabStyle visible rem), onMouseDownWindow hd ] [ text ("Window " ++ toString id) ] :: []
+              div [ style (tabStyle visible rem (barWidth - rem)), onMouseDownWindow hd ] [ text ("Window " ++ toString id) ] :: []
         hd :: tl ->
           case hd of
             Window id focused visible contents ->
-              div [ style (tabStyle visible tabWidth), onMouseDownWindow hd ] [ text ("Window " ++ toString id) ] :: window_ (rem - tabWidth) tl
+              div [ style (tabStyle visible tabWidth (barWidth - rem)), onMouseDownWindow hd ] [ text ("Window " ++ toString id) ] :: window_ (rem - tabWidth) tl
   in
   [div [ style ["width" => (toString size.width ++ "px"), "height" => (toString size.height ++ "px")] ]
-    [ div [ style ["height" => "37px", "background-color" => "#e7e7e7"] ] (window_ (tabWidth * List.length l - 2) l) -- last tab is 2px too narrow at full width
+    [ div [ style ["height" => "35px", "background-color" => "#e7e7e7", "border-bottom" => "1px solid #c6c6c6"] ] (window_ barWidth l) -- last tab is 2px too narrow at full width
     , div [ style ["height" => "25px", "line-height" => "25px", "background-color" => "#f1f1f1", "color" => "#4c4c4c"] ] [ text "New Cut Snarf Paste Eval" ]
     , textarea  [ style
                     [ "width" => (toString size.width ++ "px")
@@ -104,7 +109,7 @@ windowDrag drag =
     Nothing -> div [] []
     Just d ->
       if d.moved then
-        div [ style (tabStyle True 200 ++ [ "position" => "absolute", "top" => (toString d.current.y ++ "px"), "left" => (toString d.current.x ++ "px") ]) ]
+        div [ style (tabStyle True 200 d.current.x ++ ["top" => (toString d.current.y ++ "px")]) ]
           [ text ("Window " ++ (case d.window of Window id _ _ _ -> toString id)) ]
       else
         div [] []
@@ -138,12 +143,15 @@ pos_of_size size =
 
 -- STYLES
 
-tabStyle : Bool -> Int -> List (String, String)
-tabStyle visible width =
-    [ "border-bottom" => if visible then "1px solid #f1f1f1" else "1px solid #c6c6c6"
+tabStyle : Bool -> Int -> Int -> List (String, String)
+tabStyle visible width offset =
+    [ "position" => "absolute"
+    , "top" => "0"
+    , "left" => (toString offset ++ "px")
+    , "border-bottom" => if visible then "1px solid #f1f1f1" else "1px solid #c6c6c6"
     , "margin-top" => "5px"
     , "display" => "inline-block"
-    , "width" => (toString width ++ "px")
+    , "width" => (toString (width - (if visible then 2 else 0)) ++ "px")
     , "height" => "30px"
     , "line-height" => "30px"
     , "text-align" => "center"
