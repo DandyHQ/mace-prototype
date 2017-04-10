@@ -58,16 +58,25 @@ window size l =
     findVisible l =
       List.head
         ( List.filter (\v -> case v of Window _ _ visible _ -> visible) l )
-    window_ l =
+    tabWidth =
+      if size.width // List.length l > 200 then
+        200
+      else
+        size.width // List.length l
+    window_ rem l =
       case l of
         [] -> []
+        hd :: [] ->
+          case hd of
+            Window id focused visible contents ->
+              div [ style (tabStyle visible rem), onMouseDownWindow hd ] [ text ("Window " ++ toString id) ] :: []
         hd :: tl ->
           case hd of
             Window id focused visible contents ->
-              div [ style (tabStyle visible), onMouseDownWindow hd ] [ text ("Window " ++ toString id) ] :: window_ tl
+              div [ style (tabStyle visible tabWidth), onMouseDownWindow hd ] [ text ("Window " ++ toString id) ] :: window_ (rem - tabWidth) tl
   in
   [div [ style ["width" => (toString size.width ++ "px"), "height" => (toString size.height ++ "px")] ]
-    [ div [ style ["height" => "37px", "background-color" => "#e7e7e7"] ] (window_ l)
+    [ div [ style ["height" => "37px", "background-color" => "#e7e7e7"] ] (window_ (tabWidth * List.length l - 2) l) -- last tab is 2px too narrow at full width
     , div [ style ["height" => "25px", "line-height" => "25px", "background-color" => "#f1f1f1", "color" => "#4c4c4c"] ] [ text "New Cut Snarf Paste Eval" ]
     , textarea  [ style
                     [ "width" => (toString size.width ++ "px")
@@ -95,7 +104,7 @@ windowDrag drag =
     Nothing -> div [] []
     Just d ->
       if d.moved then
-        div [ style (tabStyle True ++ [ "position" => "absolute", "top" => (toString d.current.y ++ "px"), "left" => (toString d.current.x ++ "px") ]) ]
+        div [ style (tabStyle True 200 ++ [ "position" => "absolute", "top" => (toString d.current.y ++ "px"), "left" => (toString d.current.x ++ "px") ]) ]
           [ text ("Window " ++ (case d.window of Window id _ _ _ -> toString id)) ]
       else
         div [] []
@@ -129,12 +138,12 @@ pos_of_size size =
 
 -- STYLES
 
-tabStyle : Bool -> List (String, String)
-tabStyle visible =
+tabStyle : Bool -> Int -> List (String, String)
+tabStyle visible width =
     [ "border-bottom" => if visible then "1px solid #f1f1f1" else "1px solid #c6c6c6"
     , "margin-top" => "5px"
     , "display" => "inline-block"
-    , "width" => "200px"
+    , "width" => (toString width ++ "px")
     , "height" => "30px"
     , "line-height" => "30px"
     , "text-align" => "center"
