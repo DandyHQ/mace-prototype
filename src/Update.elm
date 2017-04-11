@@ -18,22 +18,22 @@ update msg model =
 
     -- having an onMouseDown event snuffs onClick
     -- so both are handled here
-    MoveStart w xy ->
+    MoveStart w tabPos xy ->
       ( { model
-          | moveDrag = Just (MoveDrag w False xy xy)
+          | moveDrag = Just (MoveDrag w False (Position (tabPos.x - xy.x) (tabPos.y - xy.y)) xy xy)
           , frames = Frame.focus w model.frames
         }, Cmd.none )
 
     DragAt xy ->
       ( { model
           | resizeDrag = Maybe.map (\{frame, start} -> ResizeDrag frame start xy) model.resizeDrag
-          , moveDrag = Maybe.map (\{window, moved, start} ->
+          , moveDrag = Maybe.map (\{window, moved, offset, start} ->
             MoveDrag window
               (if moved || (abs (xy.x - start.x)) > 2 || (abs (xy.y - start.y)) > 2 then
                 True
               else
                 False)
-              start xy
+              offset start xy
           ) model.moveDrag
         }, Cmd.none )
 

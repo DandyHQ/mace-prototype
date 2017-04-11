@@ -38,20 +38,20 @@ window w =
             tabWidth * List.length l
           else
             size.width - 2
-        window_ rem l =
+        window_ i rem l =
           case l of
             [] -> []
             hd :: [] ->
               case hd of
                 Tab id focused visible contents ->
-                  div [ style (tabStyle visible rem (barWidth - rem)), onMouseDownWindow hd ] [ text ("Window " ++ toString id) ] :: []
+                  div [ style (tabStyle visible rem (barWidth - rem)), onMouseDownWindow hd (Position (pos.x + tabWidth * i) pos.y) ] [ text ("Window " ++ toString id) ] :: []
             hd :: tl ->
               case hd of
                 Tab id focused visible contents ->
-                  div [ style (tabStyle visible tabWidth (barWidth - rem)), onMouseDownWindow hd ] [ text ("Window " ++ toString id) ] :: window_ (rem - tabWidth) tl
+                  div [ style (tabStyle visible tabWidth (barWidth - rem)), onMouseDownWindow hd (Position (pos.x + tabWidth * i) pos.y) ] [ text ("Window " ++ toString id) ] :: window_ (i+1) (rem - tabWidth) tl
       in
       [div [ windowStyle pos size ]
-        [ div [ style ["height" => "35px", "background-color" => "#e7e7e7", "border-bottom" => "1px solid #c6c6c6"] ] (window_ barWidth l)
+        [ div [ style ["height" => "35px", "background-color" => "#e7e7e7", "border-bottom" => "1px solid #c6c6c6"] ] (window_ 0 barWidth l)
         , div [ style ["height" => "25px", "line-height" => "25px", "background-color" => "#f1f1f1", "color" => "#4c4c4c"] ] [ text "New Cut Snarf Paste Eval" ]
         , textarea  [ style
                         [ "width" => (toString size.width ++ "px")
@@ -79,16 +79,16 @@ windowDrag drag =
     Nothing -> div [] []
     Just d ->
       if d.moved then
-        div [ style (tabStyle True 200 d.current.x ++ ["top" => (toString d.current.y ++ "px")]) ]
+        div [ style (tabStyle True 200 (d.current.x + d.offset.x) ++ ["top" => (toString (d.current.y + d.offset.y) ++ "px")]) ]
           [ text ("Window " ++ (case d.window of Tab id _ _ _ -> toString id)) ]
       else
         div [] []
 
 -- HELPERS
 
-onMouseDownWindow : Tab -> Attribute Msg
-onMouseDownWindow w =
-  on "mousedown" (Decode.map (Msg.MoveStart w) Mouse.position)
+onMouseDownWindow : Tab -> Position -> Attribute Msg
+onMouseDownWindow w tabPos =
+  on "mousedown" (Decode.map (Msg.MoveStart w tabPos) Mouse.position)
 
 onMouseDownFrame : Frame -> Attribute Msg
 onMouseDownFrame f =

@@ -31,6 +31,7 @@ type alias ResizeDrag =
 type alias MoveDrag =
   { window : Tab
   , moved : Bool
+  , offset : Position
   , start : Position
   , current : Position
   }
