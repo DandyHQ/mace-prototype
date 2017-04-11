@@ -1,14 +1,14 @@
 module Types exposing (..)
 
 -- Window ID Focused Visible Contents
-type Window = Window Int Bool Bool String
+type Tab = Tab Int Bool Bool String
 
 -- Frame Size TileStyle (List Children)
 type Frame = Frame Int Tile FrameChildren
 
-type FrameChildren = FrameFrame (List Frame) | WindowFrame (List Window)
+type FrameChildren = FrameFrame (List Frame) | WindowFrame (List Tab)
 
-type WindowPositioned = WindowPos Position Size (List Window)
+type WindowPositioned = WindowPos Position Size (List Tab)
 
 type Tile = Horiz | Vert | None
 
@@ -29,7 +29,7 @@ type alias ResizeDrag =
   }
 
 type alias MoveDrag =
-  { window : Window
+  { window : Tab
   , moved : Bool
   , start : Position
   , current : Position

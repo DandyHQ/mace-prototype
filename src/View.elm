@@ -27,7 +27,7 @@ window w =
       let
         findVisible l =
           List.head
-            ( List.filter (\v -> case v of Window _ _ visible _ -> visible) l )
+            ( List.filter (\v -> case v of Tab _ _ visible _ -> visible) l )
         tabWidth =
           if size.width // List.length l > 200 then
             200
@@ -43,11 +43,11 @@ window w =
             [] -> []
             hd :: [] ->
               case hd of
-                Window id focused visible contents ->
+                Tab id focused visible contents ->
                   div [ style (tabStyle visible rem (barWidth - rem)), onMouseDownWindow hd ] [ text ("Window " ++ toString id) ] :: []
             hd :: tl ->
               case hd of
-                Window id focused visible contents ->
+                Tab id focused visible contents ->
                   div [ style (tabStyle visible tabWidth (barWidth - rem)), onMouseDownWindow hd ] [ text ("Window " ++ toString id) ] :: window_ (rem - tabWidth) tl
       in
       [div [ windowStyle pos size ]
@@ -66,7 +66,7 @@ window w =
               Nothing -> ""
               Just w ->
                 case w of
-                  Window _ _ _ contents ->
+                  Tab _ _ _ contents ->
                     contents
             )]
         ]
@@ -80,13 +80,13 @@ windowDrag drag =
     Just d ->
       if d.moved then
         div [ style (tabStyle True 200 d.current.x ++ ["top" => (toString d.current.y ++ "px")]) ]
-          [ text ("Window " ++ (case d.window of Window id _ _ _ -> toString id)) ]
+          [ text ("Window " ++ (case d.window of Tab id _ _ _ -> toString id)) ]
       else
         div [] []
 
 -- HELPERS
 
-onMouseDownWindow : Window -> Attribute Msg
+onMouseDownWindow : Tab -> Attribute Msg
 onMouseDownWindow w =
   on "mousedown" (Decode.map (Msg.MoveStart w) Mouse.position)
 

@@ -106,16 +106,16 @@ resize drag frame =
 
 
 {- focuses a window from the current frame group -}
-focus : Window -> Frame -> Frame
+focus : Tab -> Frame -> Frame
 focus window frame =
   let
     frameChildren_ l =
       List.map frame_ l
     unsetVisible l =
-      List.map (\v -> case v of Window id focused visible contents -> Window id False False contents) l
+      List.map (\v -> case v of Tab id focused visible contents -> Tab id False False contents) l
     setVisible l =
       List.map
-        (\v -> case v of Window id focused visible contents -> Window id (window == v) (window == v) contents) l
+        (\v -> case v of Tab id focused visible contents -> Tab id (window == v) (window == v) contents) l
     frame_ f =
       case f of
         Frame s t c ->
