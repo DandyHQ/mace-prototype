@@ -17,88 +17,60 @@ import Types exposing (..)
 view : Model -> Html Msg
 view model =
   div [ pageStyle ]
-    ( frame (Position 0 0) model.window None (Frame.resize model.resizeDrag model.frames)
+    ( List.concatMap window (Frame.layoutWindows model.window (Frame.resize model.resizeDrag model.frames))
     ++ [ windowDrag model.moveDrag ])
 
-frameChildren : Position -> Size -> Size -> Tile -> List Frame -> List (Html Msg)
-frameChildren pos size rem tile l =
-  case l of
-    [] -> []
-    hd :: [] ->
-      frame (Position (pos.x + size.width - rem.width) (pos.y + size.height - rem.height)) rem tile hd
-    hd :: tl ->
-      frame (Position (pos.x + size.width - rem.width) (pos.y + size.height - rem.height)) rem tile hd
-        ++ case tile of
-          Horiz ->
-            div [ onMouseDownFrame hd, borderStyle (pos_of_size (getSize (Size (pos.x + size.width - rem.width) (pos.y + size.height - rem.height)) tile hd)) tile (Size 3 size.height) ] []
-            :: frameChildren pos size (Size (size.width - (getSize size tile hd).width - 1) size.height) tile tl
-          Vert ->
-            div [ onMouseDownFrame hd, borderStyle (pos_of_size (getSize (Size (pos.x + size.width - rem.width) (pos.y + size.height - rem.height)) tile hd)) tile (Size size.width 3) ] []
-            :: frameChildren pos size (Size size.width (size.height - (getSize size tile hd).height - 1)) tile tl
-          -- any remaining cases are the result of an invalid tree
-          _ ->
-            frameChildren pos size rem tile tl
-
-frame : Position -> Size -> Tile -> Frame -> List (Html Msg)
-frame pos size tile f =
-  case f of
-    Frame s t c ->
-        (case c of
-          FrameFrame l ->
-            frameChildren pos (getSize size tile f) (getSize size tile f) t l
-          WindowFrame l ->
-            window pos (getSize size tile f) l
-        )
-
-window : Position -> Size -> List Window -> List (Html Msg)
-window pos size l =
-  let
-    findVisible l =
-      List.head
-        ( List.filter (\v -> case v of Window _ _ visible _ -> visible) l )
-    tabWidth =
-      if size.width // List.length l > 200 then
-        200
-      else
-        size.width // List.length l
-    barWidth =
-      if tabWidth * List.length l < size.width - 2 then
-        tabWidth * List.length l
-      else
-        size.width - 2
-    window_ rem l =
-      case l of
-        [] -> []
-        hd :: [] ->
-          case hd of
-            Window id focused visible contents ->
-              div [ style (tabStyle visible rem (barWidth - rem)), onMouseDownWindow hd ] [ text ("Window " ++ toString id) ] :: []
-        hd :: tl ->
-          case hd of
-            Window id focused visible contents ->
-              div [ style (tabStyle visible tabWidth (barWidth - rem)), onMouseDownWindow hd ] [ text ("Window " ++ toString id) ] :: window_ (rem - tabWidth) tl
-  in
-  [div [ windowStyle pos size ]
-    [ div [ style ["height" => "35px", "background-color" => "#e7e7e7", "border-bottom" => "1px solid #c6c6c6"] ] (window_ barWidth l)
-    , div [ style ["height" => "25px", "line-height" => "25px", "background-color" => "#f1f1f1", "color" => "#4c4c4c"] ] [ text "New Cut Snarf Paste Eval" ]
-    , textarea  [ style
-                    [ "width" => (toString size.width ++ "px")
-                    , "height" => (toString (size.height - 36 - 25) ++ "px")
-                    , "border" => "0"
-                    , "margin" => "0"
-                    , "padding" => "0"
-                    , "overflow" => "auto"
-                    , "resize" => "none"
-                    ] ]
-        [ text (case findVisible l of
-          Nothing -> ""
-          Just w ->
-            case w of
-              Window _ _ _ contents ->
-                contents
-        )]
-    ]
-  ]
+window : WindowPositioned -> List (Html Msg)
+window w =
+  case w of
+    WindowPos pos size l ->
+      let
+        findVisible l =
+          List.head
+            ( List.filter (\v -> case v of Window _ _ visible _ -> visible) l )
+        tabWidth =
+          if size.width // List.length l > 200 then
+            200
+          else
+            size.width // List.length l
+        barWidth =
+          if tabWidth * List.length l < size.width - 2 then
+            tabWidth * List.length l
+          else
+            size.width - 2
+        window_ rem l =
+          case l of
+            [] -> []
+            hd :: [] ->
+              case hd of
+                Window id focused visible contents ->
+                  div [ style (tabStyle visible rem (barWidth - rem)), onMouseDownWindow hd ] [ text ("Window " ++ toString id) ] :: []
+            hd :: tl ->
+              case hd of
+                Window id focused visible contents ->
+                  div [ style (tabStyle visible tabWidth (barWidth - rem)), onMouseDownWindow hd ] [ text ("Window " ++ toString id) ] :: window_ (rem - tabWidth) tl
+      in
+      [div [ windowStyle pos size ]
+        [ div [ style ["height" => "35px", "background-color" => "#e7e7e7", "border-bottom" => "1px solid #c6c6c6"] ] (window_ barWidth l)
+        , div [ style ["height" => "25px", "line-height" => "25px", "background-color" => "#f1f1f1", "color" => "#4c4c4c"] ] [ text "New Cut Snarf Paste Eval" ]
+        , textarea  [ style
+                        [ "width" => (toString size.width ++ "px")
+                        , "height" => (toString (size.height - 36 - 25) ++ "px")
+                        , "border" => "0"
+                        , "margin" => "0"
+                        , "padding" => "0"
+                        , "overflow" => "auto"
+                        , "resize" => "none"
+                        ] ]
+            [ text (case findVisible l of
+              Nothing -> ""
+              Just w ->
+                case w of
+                  Window _ _ _ contents ->
+                    contents
+            )]
+        ]
+      ]
 
 
 windowDrag : Maybe MoveDrag -> Html Msg

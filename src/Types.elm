@@ -8,6 +8,8 @@ type Frame = Frame Int Tile FrameChildren
 
 type FrameChildren = FrameFrame (List Frame) | WindowFrame (List Window)
 
+type WindowPositioned = WindowPos Position Size (List Window)
+
 type Tile = Horiz | Vert | None
 
 type alias Size =

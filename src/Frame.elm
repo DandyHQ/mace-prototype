@@ -1,4 +1,4 @@
-module Frame exposing (resizeAll, resize, focus)
+module Frame exposing (resizeAll, resize, focus, layoutWindows)
 
 import Types exposing (..)
 
@@ -133,3 +133,51 @@ focus window frame =
                   f
   in
     frame_ frame
+
+
+{- positions windows at absoute positions -}
+positionFrameChildren : Position -> Size -> Size -> Tile -> List Frame -> List WindowPositioned
+positionFrameChildren pos size rem tile l =
+  case l of
+    [] -> []
+    hd :: [] ->
+      positionFrame (Position (pos.x + size.width - rem.width) (pos.y + size.height - rem.height)) rem tile hd
+    hd :: tl ->
+      positionFrame (Position (pos.x + size.width - rem.width) (pos.y + size.height - rem.height)) rem tile hd
+        ++ case tile of
+          Horiz ->
+            positionFrameChildren pos size (Size (size.width - (getSize size tile hd).width - 1) size.height) tile tl
+          Vert ->
+            positionFrameChildren pos size (Size size.width (size.height - (getSize size tile hd).height - 1)) tile tl
+          -- any remaining cases are the result of an invalid tree
+          _ ->
+            positionFrameChildren pos size rem tile tl
+
+{- positioned windows at absolute positions -}
+positionFrame : Position -> Size -> Tile -> Frame -> List WindowPositioned
+positionFrame pos size tile f =
+  case f of
+    Frame s t c ->
+        (case c of
+          FrameFrame l ->
+            positionFrameChildren pos (getSize size tile f) (getSize size tile f) t l
+          WindowFrame l ->
+            WindowPos pos (getSize size tile f) l :: []
+        )
+
+getSize : Size -> Tile -> Frame -> Size
+getSize size tile f =
+  case f of
+    Frame s _ _ ->
+      case tile of
+        None ->
+          size
+        Horiz ->
+          Size s size.height
+        Vert ->
+          Size size.width s
+
+{- calculates the absolute positions of each window -}
+layoutWindows : Size -> Frame -> List WindowPositioned
+layoutWindows size frame =
+  positionFrame (Position 0 0) size None frame
