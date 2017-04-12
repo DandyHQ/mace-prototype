@@ -19,17 +19,17 @@ init =
 initialLayout : Frame
 initialLayout =
   Frame 600 Horiz ( FrameFrame
-    [ Frame 299 None ( WindowFrame
-        [ Tab 1 True True "cat"
-        , Tab 2 False False "dog"
+    [ Frame 299 None ( WindowFrame 0
+        [ Tab 1 "cat"
+        , Tab 2 "dog"
         ])
     , Frame 299 Vert ( FrameFrame
         [ Frame 299 None
-            ( WindowFrame [ Tab 3 False True "tiger" ] )
-        , Frame 299 None ( WindowFrame
-            [ Tab 4 False False "pidgin"
-            , Tab 5 False True "frog"
-            , Tab 6 False False "song"
+            ( WindowFrame 0 [ Tab 3 "tiger" ] )
+        , Frame 299 None ( WindowFrame 0
+            [ Tab 4 "pidgin"
+            , Tab 5 "frog"
+            , Tab 6 "song"
             ])
         ])
     ])

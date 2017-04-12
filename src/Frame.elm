@@ -30,8 +30,8 @@ resizeFrame hScale vScale newSize tile f =
         (case c of
           FrameFrame l ->
             FrameFrame (resizeChildren hScale vScale newSize newSize t l)
-          WindowFrame l ->
-            WindowFrame l
+          WindowFrame id l ->
+            WindowFrame id l
         )
 
 {-| calculate new frame size for a horizontal scale -}
@@ -96,7 +96,7 @@ resize drag frame =
           case c of
             FrameFrame l ->
               Frame s t (FrameFrame (resize_ d t l))
-            WindowFrame _ ->
+            WindowFrame _ _ ->
               f
   in
   case drag of
@@ -110,29 +110,23 @@ focus : Tab -> Frame -> Frame
 focus window frame =
   let
     frameChildren_ l =
-      List.map frame_ l
-    unsetVisible l =
-      List.map (\v -> case v of Tab id focused visible contents -> Tab id False False contents) l
-    setVisible l =
-      List.map
-        (\v -> case v of Tab id focused visible contents -> Tab id (window == v) (window == v) contents) l
-    frame_ f =
+      List.indexedMap frame_ l
+    frame_ i f =
       case f of
         Frame s t c ->
           case c of
             FrameFrame l ->
               Frame s t (FrameFrame (frameChildren_ l))
-            WindowFrame l ->
+            WindowFrame _ l ->
               let
-                unset = unsetVisible l
-                set = setVisible unset
+                focused = List.sum (List.indexedMap (\k v -> if v == window then k + 1 else 0) l)
               in
-                if set /= unset then
-                  Frame s t (WindowFrame set)
-                else
-                  f
+              if focused /= 0 then
+                Frame s t (WindowFrame (focused - 1) l)
+              else
+                f
   in
-    frame_ frame
+    frame_ 0 frame
 
 
 {- positions windows at absoute positions -}
@@ -161,8 +155,8 @@ positionFrame pos size tile f =
         (case c of
           FrameFrame l ->
             positionFrameChildren pos (getSize size tile f) (getSize size tile f) t l
-          WindowFrame l ->
-            WindowPos pos (getSize size tile f) l :: []
+          WindowFrame focused l ->
+            WindowPos pos (getSize size tile f) focused l :: []
         )
 
 getSize : Size -> Tile -> Frame -> Size

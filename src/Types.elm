@@ -1,14 +1,14 @@
 module Types exposing (..)
 
--- Window ID Focused Visible Contents
-type Tab = Tab Int Bool Bool String
+-- Window ID Contents
+type Tab = Tab Int String
 
 -- Frame Size TileStyle (List Children)
 type Frame = Frame Int Tile FrameChildren
 
-type FrameChildren = FrameFrame (List Frame) | WindowFrame (List Tab)
+type FrameChildren = FrameFrame (List Frame) | WindowFrame Int (List Tab)
 
-type WindowPositioned = WindowPos Position Size (List Tab)
+type WindowPositioned = WindowPos Position Size Int (List Tab)
 
 type Tile = Horiz | Vert | None
 

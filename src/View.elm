@@ -17,17 +17,14 @@ import Types exposing (..)
 view : Model -> Html Msg
 view model =
   div [ pageStyle ]
-    ( List.concatMap window (Frame.layoutWindows model.window (Frame.resize model.resizeDrag model.frames))
+    ( List.concatMap (window model.moveDrag) (Frame.layoutWindows model.window (Frame.resize model.resizeDrag model.frames))
     ++ [ windowDrag model.moveDrag ])
 
-window : WindowPositioned -> List (Html Msg)
-window w =
+window : Maybe MoveDrag -> WindowPositioned -> List (Html Msg)
+window drag w =
   case w of
-    WindowPos pos size l ->
+    WindowPos pos size focused l ->
       let
-        findVisible l =
-          List.head
-            ( List.filter (\v -> case v of Tab _ _ visible _ -> visible) l )
         tabWidth =
           if size.width // List.length l > 200 then
             200
@@ -43,30 +40,22 @@ window w =
             [] -> []
             hd :: [] ->
               case hd of
-                Tab id focused visible contents ->
-                  div [ style (tabStyle visible rem (barWidth - rem)), onMouseDownWindow hd (Position (pos.x + tabWidth * i) pos.y) ] [ text ("Window " ++ toString id) ] :: []
+                Tab id contents ->
+                  div [ style (tabStyle (focused == i) rem (barWidth - rem)), onMouseDownWindow hd (Position (pos.x + tabWidth * i) pos.y) ] [ text ("Window " ++ toString id) ] :: []
             hd :: tl ->
               case hd of
-                Tab id focused visible contents ->
-                  div [ style (tabStyle visible tabWidth (barWidth - rem)), onMouseDownWindow hd (Position (pos.x + tabWidth * i) pos.y) ] [ text ("Window " ++ toString id) ] :: window_ (i+1) (rem - tabWidth) tl
+                Tab id contents ->
+                  div [ style (tabStyle (focused == i) tabWidth (barWidth - rem)), onMouseDownWindow hd (Position (pos.x + tabWidth * i) pos.y) ] [ text ("Window " ++ toString id) ] :: window_ (i+1) (rem - tabWidth) tl
       in
       [div [ windowStyle pos size ]
-        [ div [ style ["height" => "35px", "background-color" => "#e7e7e7", "border-bottom" => "1px solid #c6c6c6"] ] (window_ 0 barWidth l)
-        , div [ style ["height" => "25px", "line-height" => "25px", "background-color" => "#f1f1f1", "color" => "#4c4c4c"] ] [ text "New Cut Snarf Paste Eval" ]
-        , textarea  [ style
-                        [ "width" => (toString size.width ++ "px")
-                        , "height" => (toString (size.height - 36 - 25) ++ "px")
-                        , "border" => "0"
-                        , "margin" => "0"
-                        , "padding" => "0"
-                        , "overflow" => "auto"
-                        , "resize" => "none"
-                        ] ]
-            [ text (case findVisible l of
+        [ div [ tabBarStyle ] (window_ 0 barWidth l)
+        , div [ commandBarStyle ] [ text "New Cut Snarf Paste Eval" ]
+        , textarea  [ inputStyle size ]
+            [ text (case Array.get focused (Array.fromList l) of
               Nothing -> ""
               Just w ->
                 case w of
-                  Tab _ _ _ contents ->
+                  Tab _ contents ->
                     contents
             )]
         ]
@@ -80,7 +69,7 @@ windowDrag drag =
     Just d ->
       if d.moved then
         div [ style (tabStyle True 200 (d.current.x + d.offset.x) ++ ["top" => (toString (d.current.y + d.offset.y) ++ "px")]) ]
-          [ text ("Window " ++ (case d.window of Tab id _ _ _ -> toString id)) ]
+          [ text ("Window " ++ (case d.window of Tab id _ -> toString id)) ]
       else
         div [] []
 
@@ -112,6 +101,35 @@ pos_of_size size =
 
 
 -- STYLES
+
+tabBarStyle : Attribute Msg
+tabBarStyle =
+  style
+    [ "height" => "35px"
+    , "background-color" => "#e7e7e7"
+    , "border-bottom" => "1px solid #c6c6c6"
+    ]
+
+commandBarStyle : Attribute Msg
+commandBarStyle =
+  style
+    [ "height" => "25px"
+    , "line-height" => "25px"
+    , "background-color" => "#f1f1f1"
+    , "color" => "#4c4c4c"
+    ]
+
+inputStyle : Size -> Attribute Msg
+inputStyle size =
+  style
+    [ "width" => (toString size.width ++ "px")
+    , "height" => (toString (size.height - 36 - 25) ++ "px")
+    , "border" => "0"
+    , "margin" => "0"
+    , "padding" => "0"
+    , "overflow" => "auto"
+    , "resize" => "none"
+    ]
 
 tabStyle : Bool -> Int -> Int -> List (String, String)
 tabStyle visible width offset =
