@@ -38,7 +38,13 @@ update msg model =
         }, Cmd.none )
 
     DragEnd _ ->
+      let
+        positioned = Frame.layoutWindows model.window model.frames
+        shadow = Frame.tabShadow model.moveDrag positioned
+        split = Frame.applySplit model.moveDrag shadow model.frames
+      in
       ( { model
           | resizeDrag = Nothing
           , moveDrag = Nothing
+          , frames = split
         }, Cmd.none )

@@ -1,22 +1,22 @@
-module Frame exposing (initial, resizeAll, focus, layoutWindows, tabShadow)
+module Frame exposing (initial, resizeAll, focus, layoutWindows, tabShadow, applySplit)
 
 import Types exposing (..)
 
 {- initial test layout of the application window -}
 initial : Frame
 initial =
-  Frame 600 Horiz ( FrameFrame
-    [ Frame 299 Horiz ( WindowFrame 0
-        [ Tab "/root/tutorial2.py" "cat"
-        , Tab "/root/example2.py" "dog"
+  Frame 0 600 Horiz ( FrameFrame
+    [ Frame 1 299 Horiz ( WindowFrame 0
+        [ Tab 2 "/root/tutorial2.py" "cat"
+        , Tab 3 "/root/example2.py" "dog"
         ])
-    , Frame 299 Horiz ( FrameFrame
-        [ Frame 299 Vert
-            ( WindowFrame 0 [ Tab "/root/readme.md" "tiger" ] )
-        , Frame 299 Vert ( WindowFrame 0
-            [ Tab "/root/mouse.c" "pidgin"
-            , Tab "/root/example2.py" "frog"
-            , Tab "/root/music.c" "song"
+    , Frame 4 299 Horiz ( FrameFrame
+        [ Frame 5 299 Vert
+            ( WindowFrame 0 [ Tab 6 "/root/readme.md" "tiger" ] )
+        , Frame 7 299 Vert ( WindowFrame 0
+            [ Tab 8 "/root/mouse.c" "pidgin"
+            , Tab 9 "/root/example2.py" "frog"
+            , Tab 10 "/root/music.c" "song"
             ])
         ])
     ])
@@ -27,8 +27,8 @@ map fn frame =
   let
     frame_ f =
       case f of
-        Frame s t c ->
-          fn (Frame s t (case c of
+        Frame id s t c ->
+          fn (Frame id s t (case c of
             FrameFrame l ->
               FrameFrame (frameChildren_ l)
             WindowFrame id l ->
@@ -47,10 +47,10 @@ resizeAll oldSize newSize f =
   let
     scale f =
       case f of
-        Frame s t c ->
+        Frame id s t c ->
           case t of
-            Horiz -> Frame (round (toFloat newSize.width / toFloat oldSize.width * toFloat s)) t c
-            Vert -> Frame (round (toFloat newSize.height / toFloat oldSize.height * toFloat s))t c
+            Horiz -> Frame id (round (toFloat newSize.width / toFloat oldSize.width * toFloat s)) t c
+            Vert -> Frame id (round (toFloat newSize.height / toFloat oldSize.height * toFloat s))t c
             _ -> f
   in
   map scale f
@@ -115,16 +115,16 @@ focus window frame =
       List.indexedMap frame_ l
     frame_ i f =
       case f of
-        Frame s t c ->
+        Frame id s t c ->
           case c of
             FrameFrame l ->
-              Frame s t (FrameFrame (frameChildren_ l))
+              Frame id s t (FrameFrame (frameChildren_ l))
             WindowFrame _ l ->
               let
                 focused = List.sum (List.indexedMap (\k v -> if v == window then k + 1 else 0) l)
               in
               if focused /= 0 then
-                Frame s t (WindowFrame (focused - 1) l)
+                Frame id s t (WindowFrame (focused - 1) l)
               else
                 f
   in
@@ -145,7 +145,7 @@ positionFrameChildren pos parentSize rem l =
       let
         (s, tile) =
           case hd of
-            Frame s t _ -> (s, t)
+            Frame _ s t _ -> (s, t)
         size =
           case tile of
             Horiz -> Size (parentSize.width - s - 1) parentSize.height
@@ -164,12 +164,12 @@ positionFrameChildren pos parentSize rem l =
 positionFrame : Position -> Size -> Frame -> List WindowPositioned
 positionFrame pos size f =
   case f of
-    Frame s t c ->
+    Frame id s t c ->
       case c of
         FrameFrame l ->
           positionFrameChildren pos size size l
         WindowFrame focused l ->
-          WindowPos pos size NoShadow focused l :: []
+          WindowPos id pos size NoShadow focused l :: []
 
 {-| lays the windows out, positioned absolutely within the size (assumes they have been resized first) -}
 layoutWindows : Size -> Frame -> List WindowPositioned
@@ -182,34 +182,74 @@ tabShadow drag windowList =
   let
     windowShadowed d w =
       case w of
-        WindowPos pos size _ focused l ->
+        WindowPos id pos size _ focused l ->
           -- top
           if (d.current.y + d.offset.y) > pos.y + 35 && (d.current.y + d.offset.y) < pos.y + (size.height - 35) // 2
             && (d.current.x + d.offset.x) > pos.x + 100 && (d.current.x + d.offset.x) < pos.x + size.width - 300
             then
-            WindowPos pos size Top focused l
+            WindowPos id pos size Top focused l
           -- right
           else if (d.current.y + d.offset.y) > pos.y + 35 && (d.current.y + d.offset.y) < pos.y + size.height
             && (d.current.x + d.offset.x) > pos.x + size.width - 300 && (d.current.x + d.offset.x) < pos.x + size.width - 100
             then
-            WindowPos pos size Right focused l
+            WindowPos id pos size Right focused l
           -- bottom
           else if (d.current.y + d.offset.y) > pos.y + 35 + size.height // 2 && (d.current.y + d.offset.y) < pos.y + size.height
             && (d.current.x + d.offset.x) > pos.x + 100 && (d.current.x + d.offset.x) < pos.x + size.width - 300
             then
-            WindowPos pos size Bottom focused l
+            WindowPos id pos size Bottom focused l
           -- left
           else if (d.current.y + d.offset.y) > pos.y + 35 && (d.current.y + d.offset.y) < pos.y + size.height
             && (d.current.x + d.offset.x) > pos.x - 100 && (d.current.x + d.offset.x) < pos.x + 100
             then
-            WindowPos pos size Left focused l
+            WindowPos id pos size Left focused l
           else if (d.current.y + d.offset.y) > pos.y + 35 && (d.current.y + d.offset.y) < pos.y + size.height
             && (d.current.x + d.offset.x) > pos.x && (d.current.x + d.offset.x) < pos.x + size.width - 100
             then
-            WindowPos pos size Center focused l
+            WindowPos id pos size Center focused l
           else
             w
   in
   case drag of
     Nothing -> windowList
     Just d -> List.map (windowShadowed d) windowList
+
+{-| find the dragged tab and moves it into the frame that is being hovered over -}
+applySplit : Maybe MoveDrag -> List WindowPositioned -> Frame -> Frame
+applySplit drag windowList frame =
+  let
+    visitFrameChildren d w l =
+      case l of
+        [] -> []
+        hd :: tl ->
+          visitFrame d w hd :: visitFrameChildren d w tl
+    visitTabChildren d w l =
+      case l of
+        [] -> []
+        hd :: tl ->
+          -- remove the tab
+          if hd == d.window then
+            visitTabChildren d w tl
+          else
+            hd :: visitTabChildren d w tl
+    visitFrame d w f =
+      let id2 = case w of WindowPos id _ _ _ _ _ -> id in
+      case f of
+        Frame id size tile c ->
+          case c of
+            FrameFrame l ->
+              Frame id size tile (FrameFrame (visitFrameChildren d w l))
+            WindowFrame focus l ->
+              let visited = visitTabChildren d w l in
+              if id == id2 && visited /= l then f
+              else if id == id2 then
+                Frame id size tile (WindowFrame focus (visited ++ [d.window]))
+              else
+                Frame id size tile (WindowFrame focus visited)
+  in
+  case drag of
+    Nothing -> frame
+    Just d ->
+      case List.filter (\k -> case k of WindowPos _ _ _ shadow _ _ -> shadow /= NoShadow) windowList of
+        [] -> frame
+        hd :: _ ->  visitFrame d hd frame

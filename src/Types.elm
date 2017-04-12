@@ -1,17 +1,17 @@
 module Types exposing (..)
 
--- Window Name Contents
-type Tab = Tab String String
+-- Window ID Name Contents
+type Tab = Tab Int String String
 
--- Frame Size TileStyle (List Children)
-type Frame = Frame Int Tile FrameChildren
+-- Frame ID Size TileStyle (List Children)
+type Frame = Frame Int Int Tile FrameChildren
 
 type FrameChildren = FrameFrame (List Frame) | WindowFrame Int (List Tab)
 
 type Tile = Horiz | Vert | NoTile
 
--- WindowPos Position Size Shadow ID (List Children)
-type WindowPositioned = WindowPos Position Size Shadow Int (List Tab)
+-- WindowPos ID Position Size Shadow FocusedIndex (List Children)
+type WindowPositioned = WindowPos Int Position Size Shadow Int (List Tab)
 
 type Shadow = Center | Top | Right | Bottom | Left | NoShadow
 
