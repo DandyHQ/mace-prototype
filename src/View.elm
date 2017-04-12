@@ -31,68 +31,66 @@ window drag w =
     WindowPos pos size shadow focused l ->
       let
         tabShadow =
-          case drag of
-            Nothing -> div [] []
-            Just d ->
-              -- top
-              if (d.current.y + d.offset.y) > pos.y + 35 && (d.current.y + d.offset.y) < pos.y + (size.height - 35) // 2
-                && (d.current.x + d.offset.x) > pos.x + 100 && (d.current.x + d.offset.x) < pos.x + size.width - 300
-                then
-                div
-                  [ style
-                      [ "position" => "absolute"
-                      , "top" => "35px"
-                      , "width" => (toString size.width ++ "px")
-                      , "height" => (toString (size.height // 2) ++ "px")
-                      , "background-color" => "rgba(0, 0, 0, 0.2)"
-                      ]
-                  ]
-                  []
-              -- right
-              else if (d.current.y + d.offset.y) > pos.y + 35 && (d.current.y + d.offset.y) < pos.y + size.height
-                && (d.current.x + d.offset.x) > pos.x + size.width - 300 && (d.current.x + d.offset.x) < pos.x + size.width
-                then
-                div
-                  [ style
-                      [ "position" => "absolute"
-                      , "top" => "35px"
-                      , "right" => "0"
-                      , "width" => (toString (size.width // 2) ++ "px")
-                      , "height" => (toString (size.height - 35) ++ "px")
-                      , "background-color" => "rgba(0, 0, 0, 0.2)"
-                      ]
-                  ]
-                  []
-              -- bottom
-              else if (d.current.y + d.offset.y) > pos.y + 35 + size.height // 2 && (d.current.y + d.offset.y) < pos.y + size.height
-                && (d.current.x + d.offset.x) > pos.x + 100 && (d.current.x + d.offset.x) < pos.x + size.width - 300
-                then
-                div
-                  [ style
-                      [ "position" => "absolute"
-                      , "bottom" => "0"
-                      , "width" => (toString size.width ++ "px")
-                      , "height" => (toString (size.height // 2 - 35) ++ "px")
-                      , "background-color" => "rgba(0, 0, 0, 0.2)"
-                      ]
-                  ]
-                  []
-              -- left
-              else if (d.current.y + d.offset.y) > pos.y + 35 && (d.current.y + d.offset.y) < pos.y + size.height
-                && (d.current.x + d.offset.x) > pos.x && (d.current.x + d.offset.x) < pos.x + 100
-                then
-                div
-                  [ style
-                      [ "position" => "absolute"
-                      , "top" => "35px"
-                      , "left" => "0"
-                      , "width" => (toString (size.width // 2) ++ "px")
-                      , "height" => (toString (size.height - 35) ++ "px")
-                      , "background-color" => "rgba(0, 0, 0, 0.2)"
-                      ]
-                  ]
-                  []
-              else div [] []
+          case shadow of
+            NoShadow -> div [] []
+            Top ->
+              div
+                [ style
+                    [ "position" => "absolute"
+                    , "top" => "35px"
+                    , "width" => (toString size.width ++ "px")
+                    , "height" => (toString (size.height // 2) ++ "px")
+                    , "background-color" => "rgba(0, 0, 0, 0.05)"
+                    ]
+                ]
+                []
+            Right ->
+              div
+                [ style
+                    [ "position" => "absolute"
+                    , "top" => "35px"
+                    , "right" => "0"
+                    , "width" => (toString (size.width // 2) ++ "px")
+                    , "height" => (toString (size.height - 35) ++ "px")
+                    , "background-color" => "rgba(0, 0, 0, 0.05)"
+                    ]
+                ]
+                []
+            Bottom ->
+              div
+                [ style
+                    [ "position" => "absolute"
+                    , "bottom" => "0"
+                    , "width" => (toString size.width ++ "px")
+                    , "height" => (toString (size.height // 2 - 35) ++ "px")
+                    , "background-color" => "rgba(0, 0, 0, 0.05)"
+                    ]
+                ]
+                []
+            Left ->
+              div
+                [ style
+                    [ "position" => "absolute"
+                    , "top" => "35px"
+                    , "left" => "0"
+                    , "width" => (toString (size.width // 2) ++ "px")
+                    , "height" => (toString (size.height - 35) ++ "px")
+                    , "background-color" => "rgba(0, 0, 0, 0.05)"
+                    ]
+                ]
+                []
+            Center ->
+              div
+                [ style
+                    [ "position" => "absolute"
+                    , "top" => "35px"
+                    , "left" => "0"
+                    , "width" => (toString size.width ++ "px")
+                    , "height" => (toString (size.height - 35) ++ "px")
+                    , "background-color" => "rgba(0, 0, 0, 0.05)"
+                    ]
+                ]
+                []
       in
       [div [ windowStyle pos size ]
         ([ tabBar drag w, tabShadow ]

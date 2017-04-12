@@ -13,7 +13,7 @@ type Tile = Horiz | Vert | NoTile
 -- WindowPos Position Size Shadow ID (List Children)
 type WindowPositioned = WindowPos Position Size Shadow Int (List Tab)
 
-type Shadow = Top | Right | Bottom | Left | NoShadow
+type Shadow = Center | Top | Right | Bottom | Left | NoShadow
 
 type alias Size =
   { width : Int

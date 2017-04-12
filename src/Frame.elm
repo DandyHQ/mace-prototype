@@ -181,7 +181,34 @@ tabShadow : Maybe MoveDrag -> List WindowPositioned -> List WindowPositioned
 tabShadow drag windowList =
   let
     windowShadowed d w =
-      w
+      case w of
+        WindowPos pos size _ focused l ->
+          -- top
+          if (d.current.y + d.offset.y) > pos.y + 35 && (d.current.y + d.offset.y) < pos.y + (size.height - 35) // 2
+            && (d.current.x + d.offset.x) > pos.x + 100 && (d.current.x + d.offset.x) < pos.x + size.width - 300
+            then
+            WindowPos pos size Top focused l
+          -- right
+          else if (d.current.y + d.offset.y) > pos.y + 35 && (d.current.y + d.offset.y) < pos.y + size.height
+            && (d.current.x + d.offset.x) > pos.x + size.width - 300 && (d.current.x + d.offset.x) < pos.x + size.width
+            then
+            WindowPos pos size Right focused l
+          -- bottom
+          else if (d.current.y + d.offset.y) > pos.y + 35 + size.height // 2 && (d.current.y + d.offset.y) < pos.y + size.height
+            && (d.current.x + d.offset.x) > pos.x + 100 && (d.current.x + d.offset.x) < pos.x + size.width - 300
+            then
+            WindowPos pos size Bottom focused l
+          -- left
+          else if (d.current.y + d.offset.y) > pos.y + 35 && (d.current.y + d.offset.y) < pos.y + size.height
+            && (d.current.x + d.offset.x) > pos.x && (d.current.x + d.offset.x) < pos.x + 100
+            then
+            WindowPos pos size Left focused l
+          else if (d.current.y + d.offset.y) > pos.y + 35 && (d.current.y + d.offset.y) < pos.y + size.height
+            && (d.current.x + d.offset.x) > pos.x && (d.current.x + d.offset.x) < pos.x + size.width
+            then
+            WindowPos pos size Center focused l
+          else
+            w
   in
   case drag of
     Nothing -> windowList
