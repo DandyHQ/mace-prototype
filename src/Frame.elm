@@ -5,18 +5,18 @@ import Types exposing (..)
 {- initial test layout of the application window -}
 initial : Frame
 initial =
-  Frame 0 600 Horiz ( FrameFrame
-    [ Frame 1 299 Horiz ( WindowFrame 0
-        [ Tab 2 "/root/tutorial2.py" "cat"
-        , Tab 3 "/root/example2.py" "dog"
+  Frame "0" (Size 600 600) Horiz ( FrameFrame
+    [ Frame "00" (Size 300 600) Horiz ( WindowFrame 0
+        [ Tab "000" "/root/tutorial2.py" "cat"
+        , Tab "001" "/root/example2.py" "dog"
         ])
-    , Frame 4 299 Horiz ( FrameFrame
-        [ Frame 5 299 Vert
-            ( WindowFrame 0 [ Tab 6 "/root/readme.md" "tiger" ] )
-        , Frame 7 299 Vert ( WindowFrame 0
-            [ Tab 8 "/root/mouse.c" "pidgin"
-            , Tab 9 "/root/example2.py" "frog"
-            , Tab 10 "/root/music.c" "song"
+    , Frame "00" (Size 299 600) Horiz ( FrameFrame
+        [ Frame "000" (Size 299 300) Vert
+            ( WindowFrame 0 [ Tab "0000" "/root/readme.md" "tiger" ] )
+        , Frame "001" (Size 299 299) Vert ( WindowFrame 0
+            [ Tab "0010" "/root/mouse.c" "pidgin"
+            , Tab "0011" "/root/example2.py" "frog"
+            , Tab "0012" "/root/music.c" "song"
             ])
         ])
     ])
@@ -48,10 +48,11 @@ resizeAll oldSize newSize f =
     scale f =
       case f of
         Frame id s t c ->
-          case t of
-            Horiz -> Frame id (round (toFloat newSize.width / toFloat oldSize.width * toFloat s)) t c
-            Vert -> Frame id (round (toFloat newSize.height / toFloat oldSize.height * toFloat s))t c
-            _ -> f
+          Frame id
+            (Size
+              (round (toFloat newSize.width / toFloat oldSize.width * toFloat s.width))
+              (round (toFloat newSize.height / toFloat oldSize.height * toFloat s.height))
+            ) t c
   in
   map scale f
 
@@ -148,8 +149,8 @@ positionFrameChildren pos parentSize rem l =
             Frame _ s t _ -> (s, t)
         size =
           case tile of
-            Horiz -> Size (parentSize.width - s - 1) parentSize.height
-            Vert -> Size parentSize.width (parentSize.height - s - 1)
+            Horiz -> Size (parentSize.width - s.width - 1) parentSize.height
+            Vert -> Size parentSize.width (parentSize.height - s.height - 1)
             NoTile -> parentSize
         rem_ =
           case tile of
@@ -214,6 +215,34 @@ tabShadow drag windowList =
     Nothing -> windowList
     Just d -> List.map (windowShadowed d) windowList
 
+{-| shuffles all the IDs down giving a new number to each node -}
+reId : Frame -> Frame
+reId frame =
+  let
+    tabChildren_ id i l =
+      case l of
+        [] -> []
+        hd :: tl ->
+          case hd of
+            Tab _ name contents ->
+              Tab (id ++ (toString i)) name contents :: tabChildren_ id (i + 1) tl
+    frameChildren_ id i l =
+      case l of
+        [] -> []
+        hd :: tl ->
+          frame_ (id ++ (toString i)) hd :: frameChildren_ id (i + 1) tl
+    frame_ id f =
+      case f of
+        Frame _ size tile children ->
+          case children of
+            FrameFrame list ->
+              Frame id size tile (FrameFrame (frameChildren_ id 0 list))
+            WindowFrame focus list ->
+              Frame id size tile (WindowFrame focus (tabChildren_ id 0 list))
+  in
+  frame_ "0" frame
+
+
 {-| find the dragged tab and moves it into the frame that is being hovered over -}
 applySplit : Maybe MoveDrag -> List WindowPositioned -> Frame -> Frame
 applySplit drag windowList frame =
@@ -248,8 +277,8 @@ applySplit drag windowList frame =
               case c of
                 WindowFrame focus l ->
                   Frame id size tile (FrameFrame
-                    [ Frame 111 (size // 2) Vert (WindowFrame 0 [tab])
-                    , Frame 112 (size - size // 2 - 1) Vert (WindowFrame focus l)
+                    [ Frame (id ++ "0") (Size size.width (size.height // 2)) Vert (WindowFrame 0 [tab])
+                    , Frame (id ++ "1") (Size size.width (size.height - size.height // 2 - 1)) Vert (WindowFrame focus l)
                     ])
                 _ -> f
         Right ->
@@ -258,8 +287,8 @@ applySplit drag windowList frame =
               case c of
                 WindowFrame focus l ->
                   Frame id size tile (FrameFrame
-                    [ Frame 111 (size // 2) Horiz (WindowFrame focus l)
-                    , Frame 112 (size - size // 2 - 1) Horiz (WindowFrame 0 [tab])
+                    [ Frame (id ++ "0") (Size (size.width // 2) size.height) Horiz (WindowFrame focus l)
+                    , Frame (id ++ "1") (Size (size.width - size.width // 2 - 1) size.height) Horiz (WindowFrame 0 [tab])
                     ])
                 _ -> f
         Bottom ->
@@ -268,8 +297,8 @@ applySplit drag windowList frame =
               case c of
                 WindowFrame focus l ->
                   Frame id size tile (FrameFrame
-                    [ Frame 111 (size // 2) Vert (WindowFrame focus l)
-                    , Frame 112 (size - size // 2 - 1) Vert (WindowFrame 0 [tab])
+                    [ Frame (id ++ "0") (Size size.width (size.height // 2)) Vert (WindowFrame focus l)
+                    , Frame (id ++ "1") (Size size.width (size.height - size.height // 2 - 1)) Vert (WindowFrame 0 [tab])
                     ])
                 _ -> f
         Left ->
@@ -278,8 +307,8 @@ applySplit drag windowList frame =
               case c of
                 WindowFrame focus l ->
                   Frame id size tile (FrameFrame
-                    [ Frame 111 (size // 2) Horiz (WindowFrame 0 [tab])
-                    , Frame 112 (size - size // 2 - 1) Horiz (WindowFrame focus l)
+                    [ Frame (id ++ "0") (Size (size.width // 2) size.height) Horiz (WindowFrame 0 [tab])
+                    , Frame (id ++ "1") (Size (size.width - size.width // 2 - 1) size.height) Horiz (WindowFrame focus l)
                     ])
                 _ -> f
         NoShadow ->
@@ -304,4 +333,4 @@ applySplit drag windowList frame =
     Just d ->
       case List.filter (\k -> case k of WindowPos _ _ _ shadow _ _ -> shadow /= NoShadow) windowList of
         [] -> frame
-        hd :: _ ->  visitFrame d hd frame
+        hd :: _ ->  reId (visitFrame d hd frame)
