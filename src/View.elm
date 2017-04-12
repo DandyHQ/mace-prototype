@@ -24,31 +24,8 @@ window : Maybe MoveDrag -> WindowPositioned -> List (Html Msg)
 window drag w =
   case w of
     WindowPos pos size focused l ->
-      let
-        tabWidth =
-          if size.width // List.length l > 200 then
-            200
-          else
-            size.width // List.length l
-        barWidth =
-          if tabWidth * List.length l < size.width - 2 then
-            tabWidth * List.length l
-          else
-            size.width - 2
-        window_ i rem l =
-          case l of
-            [] -> []
-            hd :: [] ->
-              case hd of
-                Tab id contents ->
-                  div [ style (tabStyle (focused == i) rem (barWidth - rem)), onMouseDownWindow hd (Position (pos.x + tabWidth * i) pos.y) ] [ text ("Window " ++ toString id) ] :: []
-            hd :: tl ->
-              case hd of
-                Tab id contents ->
-                  div [ style (tabStyle (focused == i) tabWidth (barWidth - rem)), onMouseDownWindow hd (Position (pos.x + tabWidth * i) pos.y) ] [ text ("Window " ++ toString id) ] :: window_ (i+1) (rem - tabWidth) tl
-      in
       [div [ windowStyle pos size ]
-        [ div [ tabBarStyle ] (window_ 0 barWidth l)
+        [ tabBar drag w
         , div [ commandBarStyle ] [ text "New Cut Snarf Paste Eval" ]
         , textarea  [ inputStyle size ]
             [ text (case Array.get focused (Array.fromList l) of
@@ -60,6 +37,42 @@ window drag w =
             )]
         ]
       ]
+
+tabBar : Maybe MoveDrag -> WindowPositioned -> Html Msg
+tabBar drag w =
+    case w of
+      WindowPos pos size focused l ->
+        let
+          tabWidth =
+            if size.width // List.length l > 200 then
+              200
+            else
+              size.width // List.length l
+          barWidth =
+            if tabWidth * List.length l < size.width - 2 then
+              tabWidth * List.length l
+            else
+              size.width - 2
+          tabOverlaps pos =
+            case drag of
+              Nothing -> False
+              Just d ->
+                d.moved
+                && abs (pos.y - (d.current.y + d.offset.y)) < 15
+                && abs (pos.x - (d.current.x + d.offset.x)) < tabWidth // 2
+          window_ i rem l =
+            case l of
+              [] -> []
+              hd :: [] ->
+                case hd of
+                  Tab id contents ->
+                    div [ style (tabStyle (focused == i) rem (barWidth - rem)), onMouseDownWindow hd (Position (pos.x + tabWidth * i) pos.y) ] [ div [ rearrangeIndicator (tabOverlaps (Position (pos.x + tabWidth * i) pos.y)) ] [], text ("Window " ++ toString id) ] :: []
+              hd :: tl ->
+                case hd of
+                  Tab id contents ->
+                    div [ style (tabStyle (focused == i) tabWidth (barWidth - rem)), onMouseDownWindow hd (Position (pos.x + tabWidth * i) pos.y) ] [ div [ rearrangeIndicator (tabOverlaps (Position (pos.x + tabWidth * i) pos.y)) ] [], text ("Window " ++ toString id) ] :: window_ (i+1) (rem - tabWidth) tl
+        in
+        div [ tabBarStyle ] (window_ 0 barWidth l)
 
 
 windowDrag : Maybe MoveDrag -> Html Msg
@@ -101,6 +114,19 @@ pos_of_size size =
 
 
 -- STYLES
+
+rearrangeIndicator : Bool -> Attribute Msg
+rearrangeIndicator overlap =
+  if overlap then
+    style
+      [ "position" => "absolute"
+      , "left" => "0"
+      , "height" => "100%"
+      , "width" => "3px"
+      , "background-color" => "#4e8dbd"
+      ]
+  else
+    style []
 
 tabBarStyle : Attribute Msg
 tabBarStyle =
