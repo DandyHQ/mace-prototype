@@ -18,13 +18,17 @@ import Types exposing (..)
 view : Model -> Html Msg
 view model =
   div [ pageStyle ]
-    ( List.concatMap (window model.moveDrag) (Frame.layoutWindows model.window model.frames)
+    (
+      let
+        windowList = Frame.layoutWindows model.window model.frames
+        windowList_ = Frame.tabShadow model.moveDrag windowList
+      in List.concatMap (window model.moveDrag) windowList_
     ++ [ windowDrag model.moveDrag ])
 
 window : Maybe MoveDrag -> WindowPositioned -> List (Html Msg)
 window drag w =
   case w of
-    WindowPos pos size focused l ->
+    WindowPos pos size shadow focused l ->
       let
         tabShadow =
           case drag of
@@ -106,7 +110,7 @@ window drag w =
 tabBar : Maybe MoveDrag -> WindowPositioned -> Html Msg
 tabBar drag w =
     case w of
-      WindowPos pos size focused l ->
+      WindowPos pos size shadow focused l ->
         let
           tabWidth =
             if size.width // List.length l > 200 then
@@ -160,23 +164,6 @@ onMouseDownWindow w tabPos =
 onMouseDownFrame : Frame -> Attribute Msg
 onMouseDownFrame f =
   on "mousedown" (Decode.map (Msg.ResizeStart f) Mouse.position)
-
-getSize : Size -> Tile -> Frame -> Size
-getSize size tile f =
-  case f of
-    Frame s _ _ ->
-      case tile of
-        None ->
-          size
-        Horiz ->
-          Size s size.height
-        Vert ->
-          Size size.width s
-
-pos_of_size : Size -> Position
-pos_of_size size =
-  Position size.width size.height
-
 
 -- STYLES
 
@@ -248,18 +235,6 @@ tabStyle visible width offset =
       ]
     else
       []
-
-frameStyle : Position -> Size -> Tile -> Attribute Msg
-frameStyle pos size tile =
-  style
-    [ "position" => "absolute"
-    , "left" => (toString pos.x ++ "px")
-    , "top" => (toString pos.y ++ "px")
-    , "width" => (toString size.width ++ "px")
-    , "height" => (toString size.height ++ "px")
-    , "vertical-align" => "top"
-    , "background-color" => if tile == None then "#fff" else "#c6c6c6"
-    ]
 
 borderStyle : Position -> Tile -> Size -> Attribute Msg
 borderStyle pos tile size =

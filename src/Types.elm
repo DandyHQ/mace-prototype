@@ -8,9 +8,12 @@ type Frame = Frame Int Tile FrameChildren
 
 type FrameChildren = FrameFrame (List Frame) | WindowFrame Int (List Tab)
 
-type WindowPositioned = WindowPos Position Size Int (List Tab)
+type Tile = Horiz | Vert | NoTile
 
-type Tile = Horiz | Vert | None
+-- WindowPos Position Size Shadow ID (List Children)
+type WindowPositioned = WindowPos Position Size Shadow Int (List Tab)
+
+type Shadow = Top | Right | Bottom | Left | NoShadow
 
 type alias Size =
   { width : Int

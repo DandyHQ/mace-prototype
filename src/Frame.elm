@@ -1,4 +1,4 @@
-module Frame exposing (initial, resizeAll, focus, layoutWindows)
+module Frame exposing (initial, resizeAll, focus, layoutWindows, tabShadow)
 
 import Types exposing (..)
 
@@ -107,7 +107,7 @@ resizeAll oldSize newSize f =
 --       resizeFrame_ d frame
 
 
-{- focuses a window from the current frame group -}
+{-| focuses a window from the current frame group -}
 focus : Tab -> Frame -> Frame
 focus window frame =
   let
@@ -131,7 +131,7 @@ focus window frame =
     frame_ 0 frame
 
 
-{- mutually recursive with positionFrame to perform a window layout -}
+{-| mutually recursive with positionFrame to perform a window layout -}
 positionFrameChildren : Position -> Size -> Size -> List Frame -> List WindowPositioned
 positionFrameChildren pos parentSize rem l =
   let
@@ -150,17 +150,17 @@ positionFrameChildren pos parentSize rem l =
           case tile of
             Horiz -> Size (parentSize.width - s - 1) parentSize.height
             Vert -> Size parentSize.width (parentSize.height - s - 1)
-            None -> parentSize
+            NoTile -> parentSize
         rem_ =
           case tile of
             Horiz -> Size (rem.width - size.width - 1) rem.height
             Vert -> Size rem.width (rem.height - size.height - 1)
-            None -> rem
+            NoTile -> rem
       in
       positionFrame pos_ size hd
       ++ positionFrameChildren pos parentSize rem_ tl
 
-{- mutually recursive with positionFrameChildren to perform a window layout -}
+{-| mutually recursive with positionFrameChildren to perform a window layout -}
 positionFrame : Position -> Size -> Frame -> List WindowPositioned
 positionFrame pos size f =
   case f of
@@ -169,9 +169,20 @@ positionFrame pos size f =
         FrameFrame l ->
           positionFrameChildren pos size size l
         WindowFrame focused l ->
-          WindowPos pos size focused l :: []
+          WindowPos pos size NoShadow focused l :: []
 
-{- lays the windows out, positioned absolutely within the size (assumes they have been resized first) -}
+{-| lays the windows out, positioned absolutely within the size (assumes they have been resized first) -}
 layoutWindows : Size -> Frame -> List WindowPositioned
 layoutWindows size frame =
   positionFrame (Position 0 0) size frame
+
+{-| figures out whether a window should be divided if the hovering tab is dropped -}
+tabShadow : Maybe MoveDrag -> List WindowPositioned -> List WindowPositioned
+tabShadow drag windowList =
+  let
+    windowShadowed d w =
+      w
+  in
+  case drag of
+    Nothing -> windowList
+    Just d -> List.map (windowShadowed d) windowList
