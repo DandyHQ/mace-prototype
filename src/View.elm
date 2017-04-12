@@ -1,6 +1,7 @@
 module View exposing (view)
 
 import Array
+import FilePath
 import Frame
 import Html exposing (..)
 import Html.Attributes exposing (style, value)
@@ -90,18 +91,16 @@ window drag w =
               else div [] []
       in
       [div [ windowStyle pos size ]
-        [ tabBar drag w
-        , div [ commandBarStyle ] [ text "New Cut Snarf Paste Eval" ]
-        , textarea  [ inputStyle size ]
-            [ text (case Array.get focused (Array.fromList l) of
-              Nothing -> ""
-              Just w ->
-                case w of
-                  Tab _ contents ->
-                    contents
-            )]
-        , tabShadow
-        ]
+        ([ tabBar drag w, tabShadow ]
+        ++ case Array.get focused (Array.fromList l) of
+          Nothing -> [ div [] [] ]
+          Just w ->
+            case w of
+              Tab name contents ->
+                [ div [ commandBarStyle ] [ text (name ++ " New Cut Snarf Paste Eval") ]
+                , textarea  [ inputStyle size ] [ text contents ]
+                ]
+        )
       ]
 
 tabBar : Maybe MoveDrag -> WindowPositioned -> Html Msg
@@ -132,11 +131,11 @@ tabBar drag w =
               hd :: [] ->
                 case hd of
                   Tab id contents ->
-                    div [ style (tabStyle (focused == i) rem (barWidth - rem)), onMouseDownWindow hd (Position (pos.x + tabWidth * i) pos.y) ] [ div [ rearrangeIndicator (tabOverlaps (Position (pos.x + tabWidth * i) pos.y)) ] [], text ("Window " ++ toString id) ] :: []
+                    div [ style (tabStyle (focused == i) rem (barWidth - rem)), onMouseDownWindow hd (Position (pos.x + tabWidth * i) pos.y) ] [ div [ rearrangeIndicator (tabOverlaps (Position (pos.x + tabWidth * i) pos.y)) ] [], text (FilePath.takeFileName id) ] :: []
               hd :: tl ->
                 case hd of
                   Tab id contents ->
-                    div [ style (tabStyle (focused == i) tabWidth (barWidth - rem)), onMouseDownWindow hd (Position (pos.x + tabWidth * i) pos.y) ] [ div [ rearrangeIndicator (tabOverlaps (Position (pos.x + tabWidth * i) pos.y)) ] [], text ("Window " ++ toString id) ] :: window_ (i+1) (rem - tabWidth) tl
+                    div [ style (tabStyle (focused == i) tabWidth (barWidth - rem)), onMouseDownWindow hd (Position (pos.x + tabWidth * i) pos.y) ] [ div [ rearrangeIndicator (tabOverlaps (Position (pos.x + tabWidth * i) pos.y)) ] [], text (FilePath.takeFileName id) ] :: window_ (i+1) (rem - tabWidth) tl
         in
         div [ tabBarStyle ] (window_ 0 barWidth l)
 

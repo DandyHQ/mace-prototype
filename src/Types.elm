@@ -1,7 +1,7 @@
 module Types exposing (..)
 
--- Window ID Contents
-type Tab = Tab Int String
+-- Window Name Contents
+type Tab = Tab String String
 
 -- Frame Size TileStyle (List Children)
 type Frame = Frame Int Tile FrameChildren
