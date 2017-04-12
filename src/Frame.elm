@@ -232,8 +232,60 @@ applySplit drag windowList frame =
             visitTabChildren d w tl
           else
             hd :: visitTabChildren d w tl
+    split tab shadow f =
+      -- XXX fix the IDs
+      case shadow of
+        Center ->
+          case f of
+            Frame id size tile c ->
+              case c of
+                WindowFrame focus l ->
+                  Frame id size tile (WindowFrame focus (l ++ [tab]))
+                _ -> f
+        Top ->
+          case f of
+            Frame id size tile c ->
+              case c of
+                WindowFrame focus l ->
+                  Frame id size tile (FrameFrame
+                    [ Frame 111 (size // 2) Vert (WindowFrame 0 [tab])
+                    , Frame 112 (size - size // 2 - 1) Vert (WindowFrame focus l)
+                    ])
+                _ -> f
+        Right ->
+          case f of
+            Frame id size tile c ->
+              case c of
+                WindowFrame focus l ->
+                  Frame id size tile (FrameFrame
+                    [ Frame 111 (size // 2) Horiz (WindowFrame focus l)
+                    , Frame 112 (size - size // 2 - 1) Horiz (WindowFrame 0 [tab])
+                    ])
+                _ -> f
+        Bottom ->
+          case f of
+            Frame id size tile c ->
+              case c of
+                WindowFrame focus l ->
+                  Frame id size tile (FrameFrame
+                    [ Frame 111 (size // 2) Vert (WindowFrame focus l)
+                    , Frame 112 (size - size // 2 - 1) Vert (WindowFrame 0 [tab])
+                    ])
+                _ -> f
+        Left ->
+          case f of
+            Frame id size tile c ->
+              case c of
+                WindowFrame focus l ->
+                  Frame id size tile (FrameFrame
+                    [ Frame 111 (size // 2) Horiz (WindowFrame 0 [tab])
+                    , Frame 112 (size - size // 2 - 1) Horiz (WindowFrame focus l)
+                    ])
+                _ -> f
+        NoShadow ->
+          f
     visitFrame d w f =
-      let id2 = case w of WindowPos id _ _ _ _ _ -> id in
+      let (id2, shadow) = case w of WindowPos id _ _ shadow _ _ -> (id, shadow) in
       case f of
         Frame id size tile c ->
           case c of
@@ -243,7 +295,7 @@ applySplit drag windowList frame =
               let visited = visitTabChildren d w l in
               if id == id2 && visited /= l then f
               else if id == id2 then
-                Frame id size tile (WindowFrame focus (visited ++ [d.window]))
+                split d.window shadow f
               else
                 Frame id size tile (WindowFrame focus visited)
   in
