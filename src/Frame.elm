@@ -190,7 +190,7 @@ tabShadow drag windowList =
             WindowPos pos size Top focused l
           -- right
           else if (d.current.y + d.offset.y) > pos.y + 35 && (d.current.y + d.offset.y) < pos.y + size.height
-            && (d.current.x + d.offset.x) > pos.x + size.width - 300 && (d.current.x + d.offset.x) < pos.x + size.width
+            && (d.current.x + d.offset.x) > pos.x + size.width - 300 && (d.current.x + d.offset.x) < pos.x + size.width - 100
             then
             WindowPos pos size Right focused l
           -- bottom
@@ -200,11 +200,11 @@ tabShadow drag windowList =
             WindowPos pos size Bottom focused l
           -- left
           else if (d.current.y + d.offset.y) > pos.y + 35 && (d.current.y + d.offset.y) < pos.y + size.height
-            && (d.current.x + d.offset.x) > pos.x && (d.current.x + d.offset.x) < pos.x + 100
+            && (d.current.x + d.offset.x) > pos.x - 100 && (d.current.x + d.offset.x) < pos.x + 100
             then
             WindowPos pos size Left focused l
           else if (d.current.y + d.offset.y) > pos.y + 35 && (d.current.y + d.offset.y) < pos.y + size.height
-            && (d.current.x + d.offset.x) > pos.x && (d.current.x + d.offset.x) < pos.x + size.width
+            && (d.current.x + d.offset.x) > pos.x && (d.current.x + d.offset.x) < pos.x + size.width - 100
             then
             WindowPos pos size Center focused l
           else
