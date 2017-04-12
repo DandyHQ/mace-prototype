@@ -112,56 +112,45 @@ focus window frame =
     frame_ 0 frame
 
 
-{- positions windows at absoute positions -}
+{- mutually recursive with positionFrame to perform a window layout -}
 positionFrameChildren : Position -> Size -> Size -> List Frame -> List WindowPositioned
 positionFrameChildren pos parentSize rem l =
+  let
+    pos_ = Position (pos.x + parentSize.width - rem.width) (pos.y + parentSize.height - rem.height)
+  in
   case l of
     [] -> []
     hd :: [] ->
-      positionFrame (Position (pos.x + parentSize.width - rem.width) (pos.y + parentSize.height - rem.height)) rem hd
+      positionFrame pos_ rem hd
     hd :: tl ->
       let
-        size =
+        (s, tile) =
           case hd of
-            Frame s t _ ->
-              case t of
-                Horiz -> Size (parentSize.width - s - 1) parentSize.height
-                Vert -> Size parentSize.width (parentSize.height - s - 1)
-                None -> parentSize
+            Frame s t _ -> (s, t)
+        size =
+          case tile of
+            Horiz -> Size (parentSize.width - s - 1) parentSize.height
+            Vert -> Size parentSize.width (parentSize.height - s - 1)
+            None -> parentSize
+        rem_ =
+          case tile of
+            Horiz -> Size (rem.width - size.width - 1) rem.height
+            Vert -> Size rem.width (rem.height - size.height - 1)
+            None -> rem
       in
-      positionFrame (Position (pos.x + parentSize.width - rem.width) (pos.y + parentSize.height - rem.height)) rem hd
-      ++ positionFrameChildren pos parentSize size tl
+      positionFrame pos_ size hd
+      ++ positionFrameChildren pos parentSize rem_ tl
 
-{- positioned windows at absolute positions -}
+{- mutually recursive with positionFrameChildren to perform a window layout -}
 positionFrame : Position -> Size -> Frame -> List WindowPositioned
-positionFrame pos parentSize f =
+positionFrame pos size f =
   case f of
     Frame s t c ->
-      let
-        size =
-          case t of
-            Horiz -> Size s parentSize.height
-            Vert -> Size parentSize.width s
-            None -> parentSize
-      in
-      (case c of
+      case c of
         FrameFrame l ->
           positionFrameChildren pos size size l
         WindowFrame focused l ->
           WindowPos pos size focused l :: []
-      )
-
-getSize : Size -> Tile -> Frame -> Size
-getSize size tile f =
-  case f of
-    Frame s _ _ ->
-      case tile of
-        None ->
-          size
-        Horiz ->
-          Size s size.height
-        Vert ->
-          Size size.width s
 
 {- lays the windows out, positioned absolutely within the size (assumes they have been resized first) -}
 layoutWindows : Size -> Frame -> List WindowPositioned
