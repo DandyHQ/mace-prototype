@@ -243,6 +243,32 @@ reId frame =
   frame_ "0" frame
 
 
+{-| ensures no windows are focusing on non-existant tabs -}
+refocusTabs : Frame -> Frame
+refocusTabs frame =
+    let
+      frameChildren_ l =
+        case l of
+          [] -> []
+          hd :: tl ->
+            frame_ hd :: frameChildren_ tl
+      frame_ f =
+        case f of
+          Frame id size tile children ->
+            case children of
+              FrameFrame list ->
+                Frame id size tile (FrameFrame (frameChildren_ list))
+              WindowFrame focus list ->
+                Frame id size tile (WindowFrame
+                  (if focus < List.length list - 1 then
+                    focus
+                  else
+                    List.length list - 1)
+                  list)
+    in
+    frame_ frame
+
+
 {-| find the dragged tab and moves it into the frame that is being hovered over -}
 applySplit : Maybe MoveDrag -> List WindowPositioned -> Frame -> Frame
 applySplit drag windowList frame =
@@ -333,4 +359,4 @@ applySplit drag windowList frame =
     Just d ->
       case List.filter (\k -> case k of WindowPos _ _ _ shadow _ _ -> shadow /= NoShadow) windowList of
         [] -> frame
-        hd :: _ ->  reId (visitFrame d hd frame)
+        hd :: _ ->  refocusTabs (reId (visitFrame d hd frame))
