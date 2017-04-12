@@ -1,6 +1,25 @@
-module Frame exposing (resizeAll, focus, layoutWindows)
+module Frame exposing (initial, resizeAll, focus, layoutWindows)
 
 import Types exposing (..)
+
+{- initial test layout of the application window -}
+initial : Frame
+initial =
+  Frame 600 Horiz ( FrameFrame
+    [ Frame 299 Horiz ( WindowFrame 0
+        [ Tab "/root/tutorial2.py" "cat"
+        , Tab "/root/example2.py" "dog"
+        ])
+    , Frame 299 Horiz ( FrameFrame
+        [ Frame 299 Vert
+            ( WindowFrame 0 [ Tab "/root/readme.md" "tiger" ] )
+        , Frame 299 Vert ( WindowFrame 0
+            [ Tab "/root/mouse.c" "pidgin"
+            , Tab "/root/example2.py" "frog"
+            , Tab "/root/music.c" "song"
+            ])
+        ])
+    ])
 
 {- applies a function to all frames -}
 map : (Frame -> Frame) -> Frame -> Frame
