@@ -34,23 +34,19 @@ resizeFrame hScale vScale newSize tile f =
             WindowFrame id l
         )
 
-{-| calculate new frame size for a horizontal scale -}
-hScale : Size -> Size -> Frame -> Size
-hScale oldSize newSize f =
-  case f of
-    Frame s _ _ ->
-      Size (round (toFloat newSize.width / toFloat oldSize.width * toFloat s)) newSize.height
-
-{-| calculate new frame size for a vertical scale -}
-vScale : Size -> Size -> Frame -> Size
-vScale oldSize newSize f =
-  case f of
-    Frame s _ _ ->
-      Size newSize.width (round (toFloat newSize.height / toFloat oldSize.height * toFloat s))
-
-{-| builds an hScale and vScale and passes it down through all the frames -}
+{-| builds scale functions and passes it to all frames -}
 resizeAll : Size -> Size -> Frame -> Frame
 resizeAll oldSize newSize f =
+  let
+    hScale oldSize newSize f =
+      case f of
+        Frame s _ _ ->
+          Size (round (toFloat newSize.width / toFloat oldSize.width * toFloat s)) newSize.height
+    vScale oldSize newSize f =
+      case f of
+        Frame s _ _ ->
+          Size newSize.width (round (toFloat newSize.height / toFloat oldSize.height * toFloat s))
+  in
   resizeFrame (hScale oldSize newSize) (vScale oldSize newSize) newSize None f
 
 
