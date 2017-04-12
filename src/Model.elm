@@ -19,14 +19,14 @@ init =
 initialLayout : Frame
 initialLayout =
   Frame 600 Horiz ( FrameFrame
-    [ Frame 299 None ( WindowFrame 0
+    [ Frame 299 Horiz ( WindowFrame 0
         [ Tab "/root/tutorial2.py" "cat"
         , Tab "/root/example2.py" "dog"
         ])
-    , Frame 299 Vert ( FrameFrame
-        [ Frame 299 None
+    , Frame 299 Horiz ( FrameFrame
+        [ Frame 299 Vert
             ( WindowFrame 0 [ Tab "/root/readme.md" "tiger" ] )
-        , Frame 299 None ( WindowFrame 0
+        , Frame 299 Vert ( WindowFrame 0
             [ Tab "/root/mouse.c" "pidgin"
             , Tab "/root/example2.py" "frog"
             , Tab "/root/music.c" "song"

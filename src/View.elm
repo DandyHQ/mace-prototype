@@ -18,7 +18,7 @@ import Types exposing (..)
 view : Model -> Html Msg
 view model =
   div [ pageStyle ]
-    ( List.concatMap (window model.moveDrag) (Frame.layoutWindows model.window (Frame.resize model.resizeDrag model.frames))
+    ( List.concatMap (window model.moveDrag) (Frame.layoutWindows model.window model.frames)
     ++ [ windowDrag model.moveDrag ])
 
 window : Maybe MoveDrag -> WindowPositioned -> List (Html Msg)

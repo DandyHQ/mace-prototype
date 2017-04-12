@@ -41,5 +41,4 @@ update msg model =
       ( { model
           | resizeDrag = Nothing
           , moveDrag = Nothing
-          , frames = if model.resizeDrag /= Nothing then Frame.resize model.resizeDrag model.frames else model.frames
         }, Cmd.none )
