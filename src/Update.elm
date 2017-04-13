@@ -11,7 +11,7 @@ update msg model =
   case msg of
 
     WindowResize newSize ->
-      ( { model | window = newSize, frames = Frame.resizeAll model.window newSize model.frames }, Cmd.none )
+      ( { model | window = newSize, frames = Frame.resizeAll newSize model.frames }, Cmd.none )
 
     ResizeStart f xy ->
       ( { model | resizeDrag = Just (ResizeDrag f xy xy) }, Cmd.none )

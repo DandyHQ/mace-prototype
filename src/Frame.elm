@@ -42,8 +42,9 @@ map fn frame =
   frame_ frame
 
 {-| builds a scale function and applies it to all frames -}
-resizeAll : Size -> Size -> Frame -> Frame
-resizeAll oldSize newSize f =
+resizeAll : Size -> Frame -> Frame
+resizeAll newSize f =
+  let oldSize = case f of Frame _ s _ _ -> s in
   let
     scale f =
       case f of
