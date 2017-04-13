@@ -3,7 +3,7 @@ node_js: node
 
 install:
   - npm install -g elm
-  - npm install -g elm
+  - npm install -g elm-test
   - elm package install -y
   - pushd tests && elm package install -y && popd
 
