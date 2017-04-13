@@ -2,6 +2,8 @@ module Frame exposing (initial, resizeAll, focus, layoutWindows, tabShadow, appl
 
 import Types exposing (..)
 
+borderWidth = 1
+
 {- initial test layout of the application window -}
 initial : Frame
 initial =
@@ -41,21 +43,61 @@ map fn frame =
   in
   frame_ frame
 
-{-| builds a scale function and applies it to all frames -}
+{-| resizes the frame tree to fit into the specified size -}
 resizeAll : Size -> Frame -> Frame
-resizeAll newSize f =
-  let oldSize = case f of Frame _ s _ _ -> s in
+resizeAll newSize frame =
   let
-    scale f =
+    oldSize = case frame of Frame _ size _ _ -> size
+    scale a b c =
+      round (toFloat a / toFloat b * toFloat c)
+    scaleWidth = scale newSize.width oldSize.width
+    scaleHeight = scale newSize.height oldSize.height
+    children_ parentSize rem l =
+      case l of
+        [] -> []
+        hd :: [] ->
+          frame_ rem hd :: []
+        hd :: tl ->
+          let
+            (oldSize, tile) = case hd of Frame _ oldSize tile _ -> (oldSize, tile)
+            size =
+              case tile of
+                Horiz -> Size (scaleWidth oldSize.width) parentSize.height
+                Vert -> Size parentSize.width (scaleHeight oldSize.height)
+                _ -> Size 0 0
+            newRem =
+              case tile of
+                Horiz -> Size (rem.width - size.width - borderWidth) parentSize.height
+                Vert -> Size parentSize.width (rem.height - size.height - borderWidth)
+                _ -> Size 0 0
+          in
+          frame_ size hd :: children_ parentSize newRem tl
+    frame_ parentSize f =
       case f of
-        Frame id s t c ->
-          Frame id
-            (Size
-              (round (toFloat newSize.width / toFloat oldSize.width * toFloat s.width))
-              (round (toFloat newSize.height / toFloat oldSize.height * toFloat s.height))
-            ) t c
+        Frame id _ tile children ->
+          case children of
+            FrameFrame l ->
+              Frame id parentSize tile (FrameFrame (children_ parentSize parentSize l))
+            WindowFrame focus l ->
+              Frame id parentSize tile (WindowFrame focus l)
   in
-  map scale f
+  frame_ newSize frame
+
+-- {-| builds a scale function and applies it to all frames -}
+-- resizeAll : Size -> Frame -> Frame
+-- resizeAll newSize f =
+--   let oldSize = case f of Frame _ s _ _ -> s in
+--   let
+--     scale f =
+--       case f of
+--         Frame id s t c ->
+--           Frame id
+--             (Size
+--               (round (toFloat newSize.width / toFloat oldSize.width * toFloat s.width))
+--               (round (toFloat newSize.height / toFloat oldSize.height * toFloat s.height))
+--             ) t c
+--   in
+--   map scale f
 
 
 -- {-| resizes two frames according to the drag on their border -}
