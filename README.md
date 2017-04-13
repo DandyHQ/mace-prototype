@@ -1,4 +1,4 @@
-# mace-prototype
+# mace-prototype [![Travis build Status](https://travis-ci.org/DandyHQ/mace-prototype.svg?branch=master)](https://travis-ci.org/DandyHQ/mace-prototype)
 Web based prototype for the planned Mace text editor
 
 ## Live Demo
