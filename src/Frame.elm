@@ -268,6 +268,55 @@ refocusTabs frame =
     in
     frame_ frame
 
+{-| removes any empty frames merging them with neighbours -}
+snuffEmpty : Frame -> Frame
+snuffEmpty frame =
+    let
+      -- remove any empty windows
+      windowFrameChildren_ l =
+        case l of
+          [] -> []
+          hd :: tl ->
+            case windowFrame_ hd of
+              Nothing -> windowFrameChildren_ tl
+              Just f -> f :: windowFrameChildren_ tl
+      windowFrame_ f =
+        case f of
+          Frame id size tile children ->
+            case children of
+              FrameFrame list ->
+                Just (Frame id size tile (FrameFrame (windowFrameChildren_ list)))
+              WindowFrame focus list ->
+                if List.length list == 0 then
+                  Nothing
+                else
+                  Just (Frame id size tile (WindowFrame focus list))
+      frameChildren_ l =
+        case l of
+          [] -> []
+          hd :: tl -> frame_ hd :: frameChildren_ tl
+      frame_ f =
+        case f of
+          Frame id size tile children ->
+            case children of
+              FrameFrame list ->
+                if List.length list == 1 then
+                  case Maybe.withDefault f (List.head list) of
+                    Frame _ _ _ children ->
+                      case children of
+                        FrameFrame list ->
+                          Frame id size tile (FrameFrame (frameChildren_ list))
+                        WindowFrame _ _ ->
+                          Frame id size tile children
+                else
+                  Frame id size tile (FrameFrame (frameChildren_ list))
+              WindowFrame focus list ->
+                f
+    in
+    -- remove empty windows first
+    case windowFrame_ frame of
+      Nothing -> frame
+      Just f -> frame_ f -- merge single child frames
 
 {-| find the dragged tab and moves it into the frame that is being hovered over -}
 applySplit : Maybe MoveDrag -> List WindowPositioned -> Frame -> Frame
@@ -359,4 +408,4 @@ applySplit drag windowList frame =
     Just d ->
       case List.filter (\k -> case k of WindowPos _ _ _ shadow _ _ -> shadow /= NoShadow) windowList of
         [] -> frame
-        hd :: _ ->  refocusTabs (reId (visitFrame d hd frame))
+        hd :: _ ->  snuffEmpty (refocusTabs (reId (visitFrame d hd frame)))
