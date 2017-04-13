@@ -3,10 +3,15 @@ node_js: node
 
 install:
   - npm install -g elm
+  - npm install -g elm
   - elm package install -y
+  - pushd tests && elm package install -y && popd
+
+before_script:
+  - elm make src/Main.elm --output=mace.js
 
 script:
-  - elm make src/Main.elm --output=mace.js
+  - elm-test
 
 deploy:
   provider: pages
