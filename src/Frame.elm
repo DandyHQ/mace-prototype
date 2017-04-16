@@ -1,6 +1,7 @@
-module Frame exposing (initial, resizeAll)
+module Frame exposing (initial, resizeAll, focus)
 
 import Types exposing (..)
+import List.Extra as List
 
 borderWidth = 1
 
@@ -83,6 +84,24 @@ position frame =
           { f | pos = shift }
   in
   frame_ (Position 0 0) frame
+
+{-| focuses a window from the current frame group -}
+focus : Tab -> Frame -> Frame
+focus tab frame =
+  let
+    children_ l =
+      List.map frame_ l
+    frame_ f =
+      case f.children of
+        FrameFrame list ->
+          { f | children = FrameFrame (children_ list) }
+        WindowFrame w ->
+          case List.elemIndex tab w.tabs of
+            Nothing -> f
+            Just i ->
+              { f | children = WindowFrame { w | focused = i } }
+  in
+    frame_ frame
 
 -- {-| resizes the frame tree to fit into the specified size -}
 -- resizeAll : Size -> Frame -> Frame
@@ -192,28 +211,7 @@ position frame =
 --       resizeFrame_ d frame
 
 --
--- {-| focuses a window from the current frame group -}
--- focus : Tab -> Frame -> Frame
--- focus window frame =
---   let
---     frameChildren_ l =
---       List.indexedMap frame_ l
---     frame_ i f =
---       case f of
---         Frame id s t c ->
---           case c of
---             FrameFrame l ->
---               Frame id s pos t (FrameFrame (frameChildren_ l))
---             WindowFrame shadow hover _ l ->
---               let
---                 focused = List.sum (List.indexedMap (\k v -> if v == window then k + 1 else 0) l)
---               in
---               if focused /= 0 then
---                 Frame id s pos t (WindowFrame shadow hover (focused - 1) l)
---               else
---                 f
---   in
---     frame_ 0 frame
+
 --
 --
 -- {-| mutually recursive with positionFrame to perform a window layout -}

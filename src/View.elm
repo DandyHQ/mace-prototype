@@ -38,12 +38,14 @@ frame f =
   in
   div [] (frame_ f)
 
+{-| renders a single window. which contains tabs and input space -}
 window : Size -> Position -> Window -> List (Html Msg)
 window size pos w =
   [ div [ windowStyle size pos ]
       [ tabBar size pos w ]
   ]
 
+{-| renders the tab bar -}
 tabBar : Size -> Position -> Window -> Html Msg
 tabBar size pos w =
   let
@@ -57,8 +59,12 @@ tabBar size pos w =
       case l of
         [] -> []
         hd :: tl ->
-          div [ tabStyle (i == w.focused) tabSize shift ] [ text hd.path ]
-            :: tab_ (i + 1) (Position (shift.x + tabSize.width) 0) tl
+          div
+            [ tabStyle (i == w.focused) tabSize shift
+            , onMouseDownTab hd (Position (pos.x + shift.x) pos.y)
+            ]
+            [ text hd.path ]
+          :: tab_ (i + 1) (Position (shift.x + tabSize.width) 0) tl
   in
   div [ tabBarStyle ] (tab_ 0 (Position 0 0) w.tabs)
 
@@ -237,10 +243,10 @@ tabBar size pos w =
 --         div [] []
 --
 -- -- HELPERS
---
--- onMouseDownWindow : Tab -> Position -> Attribute Msg
--- onMouseDownWindow w tabPos =
---   on "mousedown" (Decode.map (Msg.MoveStart w tabPos) Mouse.position)
+
+onMouseDownTab : Tab -> Position -> Attribute Msg
+onMouseDownTab w tabPos =
+  on "mousedown" (Decode.map (Msg.MoveStart w tabPos) Mouse.position)
 --
 -- onMouseDownFrame : Frame -> Attribute Msg
 -- onMouseDownFrame f =
