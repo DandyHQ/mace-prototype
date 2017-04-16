@@ -1,12 +1,36 @@
 module Types exposing (..)
 
 -- Window ID Name Contents
-type Tab = Tab String String String
+-- type Tab = Tab String String String
 
--- Frame ID Size TileStyle (List Children)
-type Frame = Frame String Size Tile FrameChildren
+-- Frame ID Size Position TileStyle (List Children)
+-- type Frame = Frame String Size Position Tile FrameChildren
+--
+-- type FrameChildren = FrameFrame (List Frame) | WindowFrame Shadow (Maybe Int) Int (List Tab)
 
-type FrameChildren = FrameFrame (List Frame) | WindowFrame Int (List Tab)
+type alias Tab =
+  { id : String
+  , path : String
+  , contents : String
+  }
+
+type alias Frame =
+  { id : String
+  , size : Size
+  , pos : Position
+  , tile : Tile
+  , children : FrameChildren
+  }
+
+type alias Window =
+  { shadow : Shadow
+  , hover : Maybe Int
+  , focused : Int
+  , tabs : List Tab
+  }
+
+type FrameChildren = FrameFrame (List Frame) | WindowFrame Window
+
 
 type Tile = Horiz | Vert | NoTile
 

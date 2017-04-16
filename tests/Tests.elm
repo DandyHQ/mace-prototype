@@ -18,38 +18,38 @@ all =
 
 beforeResize : Frame
 beforeResize =
-  Frame "0" (Size 600 600) Horiz ( FrameFrame
-    [ Frame "00" (Size 300 600) Horiz ( WindowFrame 0
+  Frame "0" (Size 600 600) (Position 0 0) Horiz ( FrameFrame
+    [ Frame "00" (Size 300 600) (Position 0 0) Horiz ( WindowFrame (Window NoShadow Nothing 0
         [ Tab "000" "/root/tutorial2.py" "cat"
         , Tab "001" "/root/example2.py" "dog"
-        ])
-    , Frame "00" (Size 299 600) Horiz ( FrameFrame
-        [ Frame "000" (Size 299 300) Vert
-            ( WindowFrame 0 [ Tab "0000" "/root/readme.md" "tiger" ] )
-        , Frame "001" (Size 299 299) Vert ( WindowFrame 0
+        ]))
+    , Frame "00" (Size 299 600) (Position 301 0) Horiz ( FrameFrame
+        [ Frame "000" (Size 299 300) (Position 301 0) Vert
+            ( WindowFrame (Window NoShadow Nothing 0 [ Tab "0000" "/root/readme.md" "tiger" ] ))
+        , Frame "001" (Size 299 299) (Position 301 301) Vert ( WindowFrame (Window NoShadow Nothing 0
             [ Tab "0010" "/root/mouse.c" "pidgin"
             , Tab "0011" "/root/example2.py" "frog"
             , Tab "0012" "/root/music.c" "song"
-            ])
+            ]))
         ])
     ])
 
 {-| frame layout after it has been resized to (Size 1539 912) -}
 afterResize : Frame
 afterResize =
-  Frame "0" (Size 1539 912) Horiz ( FrameFrame
-    [ Frame "00" (Size 770 912) Horiz ( WindowFrame 0
+  Frame "0" (Size 1539 912) (Position 0 0) Horiz ( FrameFrame
+    [ Frame "00" (Size 770 912) (Position 0 0) Horiz ( WindowFrame (Window NoShadow Nothing 0
         [ Tab "000" "/root/tutorial2.py" "cat"
         , Tab "001" "/root/example2.py" "dog"
-        ])
-    , Frame "00" (Size 768 912) Horiz ( FrameFrame
-        [ Frame "000" (Size 768 456) Vert
-            ( WindowFrame 0 [ Tab "0000" "/root/readme.md" "tiger" ] )
-        , Frame "001" (Size 768 455) Vert ( WindowFrame 0
+        ]))
+    , Frame "00" (Size 768 912) (Position 771 0) Horiz ( FrameFrame
+        [ Frame "000" (Size 768 456) (Position 771 0) Vert
+            ( WindowFrame (Window NoShadow Nothing 0 [ Tab "0000" "/root/readme.md" "tiger" ] ))
+        , Frame "001" (Size 768 455) (Position 771 457) Vert ( WindowFrame (Window NoShadow Nothing 0
             [ Tab "0010" "/root/mouse.c" "pidgin"
             , Tab "0011" "/root/example2.py" "frog"
             , Tab "0012" "/root/music.c" "song"
-            ])
+            ]))
         ])
     ])
 
@@ -60,6 +60,9 @@ resizeFrame =
     [ test "perform a resize" <|
         \() ->
           Expect.equal afterResize (Frame.resizeAll (Size 1539 912) beforeResize)
+    , test "double resize" <|
+        \() ->
+          Expect.equal beforeResize (Frame.resizeAll (Size 600 600) (Frame.resizeAll (Size 1539 912) beforeResize))
     ]
 
 filePath : Test

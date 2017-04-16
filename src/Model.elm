@@ -8,15 +8,14 @@ import Types exposing (..)
 import Window
 
 type alias Model =
-  { window : Size
-  , frames : Frame
+  { frames : Frame
   , resizeDrag : Maybe ResizeDrag
   , moveDrag : Maybe MoveDrag
   }
 
 init : ( Model, Cmd Msg )
 init =
-  ( Model (Window.Size 600 600) Frame.initial Nothing Nothing, Task.perform Msg.WindowResize Window.size )
+  ( Model Frame.initial Nothing Nothing, Task.perform Msg.WindowResize Window.size )
 
 files : Dict String String
 files =

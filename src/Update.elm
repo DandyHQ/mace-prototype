@@ -11,7 +11,7 @@ update msg model =
   case msg of
 
     WindowResize newSize ->
-      ( { model | window = newSize, frames = Frame.resizeAll newSize model.frames }, Cmd.none )
+      ( { model | frames = Frame.resizeAll newSize model.frames }, Cmd.none )
 
     ResizeStart f xy ->
       ( { model | resizeDrag = Just (ResizeDrag f xy xy) }, Cmd.none )
@@ -21,7 +21,7 @@ update msg model =
     MoveStart w tabPos xy ->
       ( { model
           | moveDrag = Just (MoveDrag w False (Position (tabPos.x - xy.x) (tabPos.y - xy.y)) xy xy)
-          , frames = Frame.focus w model.frames
+          -- , frames = Frame.focus w model.frames
         }, Cmd.none )
 
     DragAt xy ->
@@ -38,13 +38,13 @@ update msg model =
         }, Cmd.none )
 
     DragEnd _ ->
-      let
-        positioned = Frame.layoutWindows model.window model.frames
-        shadow = Frame.tabShadow model.moveDrag positioned
-        split = Frame.applySplit model.moveDrag shadow model.frames
-      in
+      -- let
+      --   positioned = Frame.layoutWindows model.window model.frames
+      --   shadow = Frame.tabShadow model.moveDrag positioned
+      --   split = Frame.applySplit model.moveDrag shadow model.frames
+      -- in
       ( { model
           | resizeDrag = Nothing
           , moveDrag = Nothing
-          , frames = split
+          -- , frames = split
         }, Cmd.none )
