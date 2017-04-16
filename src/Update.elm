@@ -37,14 +37,17 @@ update msg model =
           ) model.moveDrag
         }, Cmd.none )
 
-    DragEnd _ ->
+    DragEnd xy ->
       -- let
       --   positioned = Frame.layoutWindows model.window model.frames
       --   shadow = Frame.tabShadow model.moveDrag positioned
       --   split = Frame.applySplit model.moveDrag shadow model.frames
       -- in
+      let
+        newResizeDrag = Maybe.map (\{frame, start} -> ResizeDrag frame start xy) model.resizeDrag
+      in
       ( { model
           | resizeDrag = Nothing
           , moveDrag = Nothing
-          -- , frames = split
+          , frames = Frame.resize newResizeDrag model.frames
         }, Cmd.none )

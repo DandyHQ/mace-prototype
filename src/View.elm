@@ -17,8 +17,16 @@ import Types exposing (..)
 
 view : Model -> Html Msg
 view model =
-  div [ pageStyle ]
-    [ frame model.frames ]
+  let
+    resized = Frame.resize model.resizeDrag model.frames
+    dragDirection =
+      case model.resizeDrag of
+        Nothing -> Nothing
+        Just d ->
+          Just d.frame.tile
+  in
+  div [ pageStyle dragDirection ]
+    [ frame resized ]
 
 {-| maps a frame structure into a list of rendered windows -}
 frame : Frame -> Html Msg
@@ -27,8 +35,10 @@ frame f =
     children_ l =
       case l of
         [] -> []
+        hd :: [] ->
+          frame_ hd
         hd :: tl ->
-          frame_ hd ++ children_ tl
+          frame_ hd ++ border hd ++ children_ tl
     frame_ f =
       case f.children of
         FrameFrame l ->
@@ -67,6 +77,15 @@ tabBar size pos w =
           :: tab_ (i + 1) (Position (shift.x + tabSize.width) 0) tl
   in
   div [ tabBarStyle ] (tab_ 0 (Position 0 0) w.tabs)
+
+{-| places a border between frames which can be used to resize them -}
+border : Frame -> List (Html Msg)
+border frame =
+  [ div
+      [ borderStyle frame.tile frame.size frame.pos
+      , onMouseDownBorder frame ]
+      []
+  ]
 
 -- tabBar : Maybe MoveDrag -> WindowPositioned -> Html Msg
 -- tabBar drag w =
@@ -247,11 +266,11 @@ tabBar size pos w =
 onMouseDownTab : Tab -> Position -> Attribute Msg
 onMouseDownTab w tabPos =
   on "mousedown" (Decode.map (Msg.MoveStart w tabPos) Mouse.position)
---
--- onMouseDownFrame : Frame -> Attribute Msg
--- onMouseDownFrame f =
---   on "mousedown" (Decode.map (Msg.ResizeStart f) Mouse.position)
---
+
+onMouseDownBorder : Frame -> Attribute Msg
+onMouseDownBorder f =
+  on "mousedown" (Decode.map (Msg.ResizeStart f) Mouse.position)
+
 -- -- STYLES
 --
 -- rearrangeIndicator : Bool -> Attribute Msg
@@ -322,24 +341,29 @@ tabStyle focused size pos =
       ]
     else
       [])
---
--- borderStyle : Position -> Tile -> Size -> Attribute Msg
--- borderStyle pos tile size =
---   style
---     [ "position" => "absolute"
---     , "left" => (toString (pos.x - if tile == Horiz then 1 else 0) ++ "px")
---     , "top" => (toString (pos.y - if tile == Vert then 1 else 0) ++ "px")
---     , "width" => (toString size.width ++ "px")
---     , "height" => (toString size.height ++ "px")
---     , "cursor" => if tile == Horiz then "ew-resize" else "ns-resize"
---     ]
---
-pageStyle : Attribute Msg
-pageStyle =
+
+borderStyle : Tile -> Size -> Position -> Attribute Msg
+borderStyle tile size pos =
+  style
+    [ "position" => "absolute"
+    , "left" => (toString (if tile == Horiz then pos.x + size.width - 1 else pos.x) ++ "px")
+    , "top" => (toString (if tile == Horiz then pos.y else pos.y + size.height - 1) ++ "px")
+    , "width" => (toString (if tile == Horiz then 3 else size.width) ++ "px")
+    , "height" => (toString (if tile == Horiz then size.height else 3) ++ "px")
+    , "cursor" => if tile == Horiz then "ew-resize" else "ns-resize"
+    , "z-index" => "10"
+    ]
+
+pageStyle : Maybe Tile -> Attribute Msg
+pageStyle dragDirection =
   style
     [ "width" => "100%"
     , "height" => "100%"
     , "background-color" => "#c6c6c6"
+    , "cursor" => (case dragDirection of
+        Just Horiz -> "ew-resize"
+        Just Vert -> "ns-resize"
+        _ -> "default")
     , "-webkit-touch-callout" => "none"
     , "-webkit-user-select" => "none"
     , "-khtml-user-select" => "none"

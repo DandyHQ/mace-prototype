@@ -1,4 +1,4 @@
-module Frame exposing (initial, resizeAll, focus)
+module Frame exposing (initial, resizeAll, focus, resize)
 
 import Types exposing (..)
 import List.Extra as List
@@ -103,6 +103,45 @@ focus tab frame =
   in
     frame_ frame
 
+{-| resizes two frames according to the drag on their border -}
+resize : Maybe ResizeDrag -> Frame -> Frame
+resize drag frame =
+  let
+    children_ d l =
+      case l of
+        [] -> []
+        hd :: [] -> frame_ d hd :: []
+        a :: b :: tl ->
+          if a == d.frame then
+            -- we have found the frame. now do the resize
+            case a.tile of
+              Horiz ->
+                resizeAll (Size (a.size.width + (d.current.x - d.start.x)) a.size.height) a
+                :: resizeAll (Size (b.size.width - (d.current.x - d.start.x)) b.size.height) b
+                :: tl
+              Vert ->
+                resizeAll (Size a.size.width (a.size.height + (d.current.y - d.start.y))) a
+                :: resizeAll (Size b.size.width (b.size.height - (d.current.y - d.start.y))) b
+                :: tl
+              -- something's wrong
+              _ ->
+                a :: b :: tl
+          else
+            a :: children_ d (b :: tl)
+
+    frame_ d f =
+      case f.children of
+        FrameFrame list ->
+          { f | children = FrameFrame (children_ d list) }
+        WindowFrame _ ->
+          f
+  in
+  case drag of
+    Nothing -> frame
+    Just d ->
+      position (frame_ d frame)
+
+
 -- {-| resizes the frame tree to fit into the specified size -}
 -- resizeAll : Size -> Frame -> Frame
 -- resizeAll newSize frame =
@@ -160,55 +199,7 @@ focus tab frame =
 --   map scale f
 
 
--- {-| resizes two frames according to the drag on their border -}
--- resize : Maybe ResizeDrag -> Frame -> Frame
--- resize drag frame =
---   let
---     resize_ d t l =
---       case l of
---         [] -> []
---         hd :: [] -> resizeFrame_ d hd :: []
---         a :: b :: tl ->
---           if a == d.frame then
---             -- we have found the frame. now do the resize
---             case t of
---               Horiz ->
---                 case a of
---                   Frame s t c ->
---                     Frame (s + d.current.x - d.start.x) t c
---                 ::
---                 case b of
---                   Frame s t c ->
---                     Frame (s - (d.current.x - d.start.x)) t c
---                 :: tl
---               Vert ->
---                 case a of
---                   Frame s t c ->
---                     Frame (s + d.current.y - d.start.y) t c
---                 ::
---                 case b of
---                   Frame s t c ->
---                     Frame (s - (d.current.y - d.start.y)) t c
---                 :: tl
---               -- something's wrong
---               _ ->
---                 a :: b :: tl
---           else
---             a :: resize_ d t (b :: tl)
---
---     resizeFrame_ d f =
---       case f of
---         Frame s t c ->
---           case c of
---             FrameFrame l ->
---               Frame s t (FrameFrame (resize_ d t l))
---             WindowFrame _ _ ->
---               f
---   in
---   case drag of
---     Nothing -> frame
---     Just d ->
---       resizeFrame_ d frame
+
 
 --
 
