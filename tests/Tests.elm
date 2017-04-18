@@ -16,8 +16,8 @@ all =
         , resizeFrame
         ]
 
-beforeResize : Frame
-beforeResize =
+beforeResizeAll : Frame
+beforeResizeAll =
   Frame "0" (Size 600 600) (Position 0 0) Horiz ( FrameFrame
     [ Frame "00" (Size 300 600) (Position 0 0) Horiz ( WindowFrame (Window NoShadow Nothing 0
         [ Tab "000" "/root/tutorial2.py" "cat"
@@ -35,8 +35,8 @@ beforeResize =
     ])
 
 {-| frame layout after it has been resized to (Size 1539 912) -}
-afterResize : Frame
-afterResize =
+afterResizeAll : Frame
+afterResizeAll =
   Frame "0" (Size 1539 912) (Position 0 0) Horiz ( FrameFrame
     [ Frame "00" (Size 770 912) (Position 0 0) Horiz ( WindowFrame (Window NoShadow Nothing 0
         [ Tab "000" "/root/tutorial2.py" "cat"
@@ -53,16 +53,49 @@ afterResize =
         ])
     ])
 
+{-| frame layout after center split has been resized by 100 px -}
+afterResize : Frame
+afterResize =
+  Frame "0" (Size 600 600) (Position 0 0) Horiz ( FrameFrame
+    [ Frame "00" (Size 200 600) (Position 0 0) Horiz ( WindowFrame (Window NoShadow Nothing 0
+        [ Tab "000" "/root/tutorial2.py" "cat"
+        , Tab "001" "/root/example2.py" "dog"
+        ]))
+    , Frame "00" (Size 399 600) (Position 201 0) Horiz ( FrameFrame
+        [ Frame "000" (Size 399 300) (Position 201 0) Vert
+            ( WindowFrame (Window NoShadow Nothing 0 [ Tab "0000" "/root/readme.md" "tiger" ] ))
+        , Frame "001" (Size 399 299) (Position 201 301) Vert ( WindowFrame (Window NoShadow Nothing 0
+            [ Tab "0010" "/root/mouse.c" "pidgin"
+            , Tab "0011" "/root/example2.py" "frog"
+            , Tab "0012" "/root/music.c" "song"
+            ]))
+        ])
+    ])
+
+resizeDrag : Maybe ResizeDrag
+resizeDrag =
+  Just (ResizeDrag
+    (Frame "00" (Size 300 600) (Position 0 0) Horiz ( WindowFrame (Window NoShadow Nothing 0
+        [ Tab "000" "/root/tutorial2.py" "cat"
+        , Tab "001" "/root/example2.py" "dog"
+        ])))
+    (Position 300 300)
+    (Position 200 350)
+    )
+
 -- this should be replaced with fuzzing
 resizeFrame : Test
 resizeFrame =
   describe "Resize Frame"
     [ test "perform a resize" <|
         \() ->
-          Expect.equal afterResize (Frame.resizeAll (Size 1539 912) beforeResize)
+          Expect.equal afterResizeAll (Frame.resizeAll (Size 1539 912) beforeResizeAll)
     , test "double resize" <|
         \() ->
-          Expect.equal beforeResize (Frame.resizeAll (Size 600 600) (Frame.resizeAll (Size 1539 912) beforeResize))
+          Expect.equal beforeResizeAll (Frame.resizeAll (Size 600 600) (Frame.resizeAll (Size 1539 912) beforeResizeAll))
+    , test "resize one frame" <|
+        \() ->
+          Expect.equal afterResize (Frame.resize resizeDrag beforeResizeAll)
     ]
 
 filePath : Test
