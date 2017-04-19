@@ -14,10 +14,11 @@ all =
     describe "mace"
         [ filePath
         , resizeFrame
+        , rearrangeFrame
         ]
 
-beforeResizeAll : Frame
-beforeResizeAll =
+initFrame : Frame
+initFrame =
   Frame "0" (Size 600 600) (Position 0 0) Horiz ( FrameFrame
     [ Frame "00" (Size 300 600) (Position 0 0) Horiz ( WindowFrame (Window NoShadow Nothing 0
         [ Tab "000" "/root/tutorial2.py" "cat"
@@ -89,13 +90,76 @@ resizeFrame =
   describe "Resize Frame"
     [ test "perform a resize" <|
         \() ->
-          Expect.equal afterResizeAll (Frame.resizeAll (Size 1539 912) beforeResizeAll)
+          Expect.equal afterResizeAll (Frame.resizeAll (Size 1539 912) initFrame)
     , test "double resize" <|
         \() ->
-          Expect.equal beforeResizeAll (Frame.resizeAll (Size 600 600) (Frame.resizeAll (Size 1539 912) beforeResizeAll))
+          Expect.equal initFrame (Frame.resizeAll (Size 600 600) (Frame.resizeAll (Size 1539 912) initFrame))
     , test "resize one frame" <|
         \() ->
-          Expect.equal afterResize (Frame.resize resizeDrag beforeResizeAll)
+          Expect.equal afterResize (Frame.resize resizeDrag initFrame)
+    ]
+
+simpleMoveDrag : Maybe MoveDrag
+simpleMoveDrag =
+  Just (MoveDrag
+    (Tab "000" "/root/tutorial2.py" "cat")
+    True
+    (Position -81 -17)
+    (Position 81 17)
+    (Position 580 318)
+    )
+
+moveLastTab : Maybe MoveDrag
+moveLastTab =
+  Just (MoveDrag
+    (Tab "0000" "/root/readme.md" "tiger")
+    True
+    (Position -125 -19)
+    (Position 993 19)
+    (Position 1001 595)
+    )
+
+afterSimpleRearrange : Frame
+afterSimpleRearrange =
+  Frame "0" (Size 600 600) (Position 0 0) Horiz ( FrameFrame
+    [ Frame "00" (Size 300 600) (Position 0 0) Horiz
+      ( WindowFrame (Window NoShadow Nothing 0 [ Tab "000" "/root/example2.py" "dog" ] ))
+    , Frame "01" (Size 299 600) (Position 301 0) Horiz ( FrameFrame
+        [ Frame "010" (Size 299 300) (Position 301 0) Vert
+            ( WindowFrame (Window NoShadow Nothing 0 [ Tab "0100" "/root/readme.md" "tiger" ] ))
+        , Frame "011" (Size 299 299) (Position 301 301) Vert ( WindowFrame (Window NoShadow Nothing 3
+            [ Tab "0110" "/root/mouse.c" "pidgin"
+            , Tab "0111" "/root/example2.py" "frog"
+            , Tab "0112" "/root/music.c" "song"
+            , Tab "0113" "/root/tutorial2.py" "cat"
+            ]))
+        ])
+    ])
+
+afterMoveLastTab : Frame
+afterMoveLastTab =
+  Frame "0" (Size 600 600) (Position 0 0) Horiz ( FrameFrame
+    [ Frame "00" (Size 300 600) (Position 0 0) Horiz ( WindowFrame (Window NoShadow Nothing 0
+        [ Tab "000" "/root/tutorial2.py" "cat"
+        , Tab "001" "/root/example2.py" "dog"
+        ]))
+    , Frame "01" (Size 299 600) (Position 301 0) Horiz ( WindowFrame (Window NoShadow Nothing 0
+        [ Tab "010" "/root/readme.md" "tiger"
+        , Tab "011" "/root/mouse.c" "pidgin"
+        , Tab "012" "/root/example2.py" "frog"
+        , Tab "013" "/root/music.c" "song"
+        ]))
+    ])
+
+rearrangeFrame : Test
+rearrangeFrame =
+  describe "Rearrange the frames"
+    [ test "one tab to another window" <|
+        \() ->
+          Expect.equal afterSimpleRearrange (Frame.rearrange simpleMoveDrag initFrame)
+    , test "moving the last tab out" <|
+        \() ->
+          Expect.equal afterMoveLastTab (Frame.rearrange moveLastTab initFrame)
     ]
 
 filePath : Test

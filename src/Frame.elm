@@ -1,4 +1,4 @@
-module Frame exposing (initial, resizeAll, focus, resize, hover)
+module Frame exposing (initial, resizeAll, focus, resize, hover, rearrange)
 
 import Types exposing (..)
 import List.Extra as List
@@ -13,13 +13,13 @@ initial =
         [ Tab "000" "/root/tutorial2.py" "cat"
         , Tab "001" "/root/example2.py" "dog"
         ]))
-    , Frame "00" (Size 299 600) (Position 300 0) Horiz ( FrameFrame
-        [ Frame "000" (Size 299 300) (Position 300 0) Vert
+    , Frame "01" (Size 299 600) (Position 300 0) Horiz ( FrameFrame
+        [ Frame "010" (Size 299 300) (Position 300 0) Vert
             ( WindowFrame (Window NoShadow Nothing 0 [ Tab "0000" "/root/readme.md" "tiger" ] ))
-        , Frame "001" (Size 299 299) (Position 300 300) Vert ( WindowFrame (Window NoShadow Nothing 0
-            [ Tab "0010" "/root/mouse.c" "pidgin"
-            , Tab "0011" "/root/example2.py" "frog"
-            , Tab "0012" "/root/music.c" "song"
+        , Frame "011" (Size 299 299) (Position 300 300) Vert ( WindowFrame (Window NoShadow Nothing 0
+            [ Tab "0110" "/root/mouse.c" "pidgin"
+            , Tab "0111" "/root/example2.py" "frog"
+            , Tab "0112" "/root/music.c" "song"
             ]))
         ])
     ])
@@ -154,7 +154,7 @@ id frame =
         FrameFrame list ->
           { f | id = id, children = FrameFrame (children_ id list) }
         WindowFrame w ->
-          { f | children = WindowFrame { w | tabs = tab_ id w.tabs } }
+          { f | id = id, children = WindowFrame { w | tabs = tab_ id w.tabs } }
   in
   frame_ "0" frame
 
@@ -191,6 +191,69 @@ hoverTabBar drag frame =
         { frame | children = WindowFrame { w | hover = Just ((dragPos.x - frame.pos.x + 100) // tabSize.width) } }
       else
         frame
+
+{-| takes a moveDrag and applies what effect the hover is specifying -}
+rearrange : Maybe MoveDrag -> Frame -> Frame
+rearrange drag frame =
+  case drag of
+    Nothing -> frame
+    Just d ->
+      if not d.moved then
+        frame
+      else
+        applyHoverTabBar d frame
+
+{-| calls hoverTabBar and applies the transformation it represents -}
+applyHoverTabBar : MoveDrag -> Frame -> Frame
+applyHoverTabBar drag frame =
+  let
+    hovered = hoverTabBar drag frame
+    frame_ f =
+      case f.children of
+        FrameFrame list ->
+          { f | children = FrameFrame (List.map frame_ list) }
+        WindowFrame w ->
+          case w.hover of
+            Nothing ->
+              let
+                updatedTabs = List.remove drag.tab w.tabs
+              in
+              { f | children = WindowFrame
+                { w | hover = Nothing
+                , tabs = updatedTabs
+                , focused = min w.focused (List.length updatedTabs - 1)
+                }
+              }
+            Just index ->
+              let
+                dragTab = drag.tab -- name.with.dot doesn't work in record update syntax
+                newTab = { dragTab | id = "new" } -- stops the possible concurrency bug of inserting and removing
+                updatedTabs = List.remove drag.tab (insertAt index newTab w.tabs)
+              in
+              { f | children = WindowFrame
+                { w | hover = Nothing
+                , tabs = updatedTabs
+                , focused = (case List.elemIndex newTab updatedTabs of
+                      Nothing -> 0
+                      Just index -> index
+                    )
+                }
+              }
+  in
+  if hovered == frame then
+    frame
+  else
+    id (frame_ hovered)
+
+{-| helper function. inserts a value at index into a list, or at the end of index too large -}
+insertAt key value list =
+  case list of
+    [] -> value :: []
+    hd :: tl ->
+      if key == 0 then
+        value :: hd :: tl
+      else
+        hd :: insertAt (key - 1) value tl
 
 -- hoverWindow : MoveDrag -> Frame -> Frame
 -- {-| figures out whether a window should be divided if the hovering tab is dropped -}

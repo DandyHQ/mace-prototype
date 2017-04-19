@@ -45,9 +45,11 @@ update msg model =
       -- in
       let
         newResizeDrag = Maybe.map (\{frame, start} -> ResizeDrag frame start xy) model.resizeDrag
+        resized = Frame.resize newResizeDrag model.frames
+        rearranged = Frame.rearrange model.moveDrag resized
       in
       ( { model
           | resizeDrag = Nothing
           , moveDrag = Nothing
-          , frames = Frame.resize newResizeDrag model.frames
+          , frames = rearranged
         }, Cmd.none )
