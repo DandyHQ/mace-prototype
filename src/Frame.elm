@@ -1,4 +1,4 @@
-module Frame exposing (initial, resizeAll, focus, resize)
+module Frame exposing (initial, resizeAll, focus, resize, hover)
 
 import Types exposing (..)
 import List.Extra as List
@@ -101,7 +101,7 @@ focus tab frame =
             Just i ->
               { f | children = WindowFrame { w | focused = i } }
   in
-    frame_ frame
+  frame_ frame
 
 {-| resizes two frames according to the drag on their border -}
 resize : Maybe ResizeDrag -> Frame -> Frame
@@ -141,115 +141,58 @@ resize drag frame =
     Just d ->
       position (frame_ d frame)
 
+{-| gives a new identifier to each frame and tab -}
+id : Frame -> Frame
+id frame =
+  let
+    children_ id l =
+      List.indexedMap (\k v -> frame_ (id ++ toString k) v) l
+    tab_ id l =
+      List.indexedMap (\k v -> { v | id = id ++ toString k }) l
+    frame_ id f =
+      case f.children of
+        FrameFrame list ->
+          { f | id = id, children = FrameFrame (children_ id list) }
+        WindowFrame w ->
+          { f | children = WindowFrame { w | tabs = tab_ id w.tabs } }
+  in
+  frame_ "0" frame
 
--- {-| resizes the frame tree to fit into the specified size -}
--- resizeAll : Size -> Frame -> Frame
--- resizeAll newSize frame =
---   let
---     oldSize = case frame of Frame _ size _ _ -> size
---     scale a b c =
---       round (toFloat a / toFloat b * toFloat c)
---     scaleWidth = scale newSize.width oldSize.width
---     scaleHeight = scale newSize.height oldSize.height
---     children_ parentSize rem l =
---       case l of
---         [] -> []
---         hd :: [] ->
---           frame_ rem hd :: []
---         hd :: tl ->
---           let
---             (oldSize, tile) = case hd of Frame _ oldSize _ tile _ -> (oldSize, tile)
---             size =
---               case tile of
---                 Horiz -> Size (scaleWidth oldSize.width) parentSize.height
---                 Vert -> Size parentSize.width (scaleHeight oldSize.height)
---                 _ -> Size 0 0
---             newRem =
---               case tile of
---                 Horiz -> Size (rem.width - size.width - borderWidth) parentSize.height
---                 Vert -> Size parentSize.width (rem.height - size.height - borderWidth)
---                 _ -> Size 0 0
---           in
---           frame_ size hd :: children_ parentSize newRem tl
---     frame_ parentSize f =
---       case f of
---         Frame id _ tile children ->
---           case children of
---             FrameFrame l ->
---               Frame id parentSize tile (FrameFrame (children_ parentSize parentSize l))
---             WindowFrame shadow hover focus l ->
---               Frame id parentSize tile (WindowFrame shadow hover focus l)
---   in
---   frame_ newSize frame
+{-| takes a moveDrag and figures out where it is hovering -}
+hover : Maybe MoveDrag -> Frame -> Frame
+hover drag frame =
+  case drag of
+    Nothing -> frame
+    Just d ->
+      if not d.moved then
+        frame
+      else
+        hoverTabBar d frame
 
--- {-| builds a scale function and applies it to all frames -}
--- resizeAll : Size -> Frame -> Frame
--- resizeAll newSize f =
---   let oldSize = case f of Frame _ s _ _ -> s in
---   let
---     scale f =
---       case f of
---         Frame id s t c ->
---           Frame id
---             (Size
---               (round (toFloat newSize.width / toFloat oldSize.width * toFloat s.width))
---               (round (toFloat newSize.height / toFloat oldSize.height * toFloat s.height))
---             ) t c
---   in
---   map scale f
+{-| takes a moveDrag and figures out if it's over a tab bar -}
+hoverTabBar : MoveDrag -> Frame -> Frame
+hoverTabBar drag frame =
+  case frame.children of
+    FrameFrame list ->
+      { frame | children = FrameFrame (List.map (hoverTabBar drag) list) }
+    WindowFrame w ->
+      let
+        tabSize =
+          let average = frame.size.width // List.length w.tabs in
+          if average > 200 then
+            Size 200 30
+          else
+            Size average 30
+        dragPos = Position (drag.current.x + drag.offset.x) (drag.current.y + drag.offset.y)
+        hovering = dragPos.y > frame.pos.y - 15 && dragPos.y < frame.pos.y + 20 -- tab height is 30, tabBar 35
+          && dragPos.x > frame.pos.x && dragPos.x < frame.pos.x + frame.size.width
+      in
+      if hovering then
+        { frame | children = WindowFrame { w | hover = Just ((dragPos.x - frame.pos.x + 100) // tabSize.width) } }
+      else
+        frame
 
-
-
-
---
-
---
---
--- {-| mutually recursive with positionFrame to perform a window layout -}
--- positionFrameChildren : Position -> Size -> Size -> List Frame -> List WindowPositioned
--- positionFrameChildren pos parentSize rem l =
---   let
---     pos_ = Position (pos.x + parentSize.width - rem.width) (pos.y + parentSize.height - rem.height)
---   in
---   case l of
---     [] -> []
---     hd :: [] ->
---       positionFrame pos_ rem hd
---     hd :: tl ->
---       let
---         (s, tile) =
---           case hd of
---             Frame _ s _ t _ -> (s, t)
---         size =
---           case tile of
---             Horiz -> Size (parentSize.width - s.width - 1) parentSize.height
---             Vert -> Size parentSize.width (parentSize.height - s.height - 1)
---             NoTile -> parentSize
---         rem_ =
---           case tile of
---             Horiz -> Size (rem.width - size.width - 1) rem.height
---             Vert -> Size rem.width (rem.height - size.height - 1)
---             NoTile -> rem
---       in
---       positionFrame pos_ size hd
---       ++ positionFrameChildren pos parentSize rem_ tl
---
--- {-| mutually recursive with positionFrameChildren to perform a window layout -}
--- positionFrame : Position -> Size -> Frame -> List WindowPositioned
--- positionFrame pos size f =
---   case f of
---     Frame id s _ t c ->
---       case c of
---         FrameFrame l ->
---           positionFrameChildren pos size size l
---         WindowFrame shadow hover focused l ->
---           WindowPos id pos size NoShadow focused l :: []
---
--- {-| lays the windows out, positioned absolutely within the size (assumes they have been resized first) -}
--- layoutWindows : Size -> Frame -> List WindowPositioned
--- layoutWindows size frame =
---   positionFrame (Position 0 0) size frame
---
+-- hoverWindow : MoveDrag -> Frame -> Frame
 -- {-| figures out whether a window should be divided if the hovering tab is dropped -}
 -- tabShadow : Maybe MoveDrag -> List WindowPositioned -> List WindowPositioned
 -- tabShadow drag windowList =
@@ -288,32 +231,6 @@ resize drag frame =
 --     Nothing -> windowList
 --     Just d -> List.map (windowShadowed d) windowList
 --
--- {-| shuffles all the IDs down giving a new number to each node -}
--- reId : Frame -> Frame
--- reId frame =
---   let
---     tabChildren_ id i l =
---       case l of
---         [] -> []
---         hd :: tl ->
---           case hd of
---             Tab _ name contents ->
---               Tab (id ++ (toString i)) name contents :: tabChildren_ id (i + 1) tl
---     frameChildren_ id i l =
---       case l of
---         [] -> []
---         hd :: tl ->
---           frame_ (id ++ (toString i)) hd :: frameChildren_ id (i + 1) tl
---     frame_ id f =
---       case f of
---         Frame _ size pos tile children ->
---           case children of
---             FrameFrame list ->
---               Frame id size pos tile (FrameFrame (frameChildren_ id 0 list))
---             WindowFrame shadow hover focus list ->
---               Frame id size pos tile (WindowFrame shadow hover focus (tabChildren_ id 0 list))
---   in
---   frame_ "0" frame
 --
 --
 -- {-| ensures no windows are focusing on non-existant tabs -}

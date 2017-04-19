@@ -19,6 +19,7 @@ view : Model -> Html Msg
 view model =
   let
     resized = Frame.resize model.resizeDrag model.frames
+    hovered = Frame.hover model.moveDrag resized
     dragDirection =
       case model.resizeDrag of
         Nothing -> Nothing
@@ -26,7 +27,9 @@ view model =
           Just d.frame.tile
   in
   div [ pageStyle dragDirection ]
-    [ frame resized ]
+    [ frame hovered
+    , floatingTab model.moveDrag
+    ]
 
 {-| maps a frame structure into a list of rendered windows -}
 frame : Frame -> Html Msg
@@ -73,10 +76,23 @@ tabBar size pos w =
             [ tabStyle (i == w.focused) tabSize shift
             , onMouseDownTab hd (Position (pos.x + shift.x) pos.y)
             ]
-            [ text hd.path ]
+            [ div [ rearrangeIndicator (Just i == w.hover) (Position 0 0) ] []
+            , text hd.path
+            ]
           :: tab_ (i + 1) (Position (shift.x + tabSize.width) 0) tl
   in
-  div [ tabBarStyle ] (tab_ 0 (Position 0 0) w.tabs)
+  div [ tabBarStyle ]
+    ( tab_ 0 (Position 0 0) w.tabs
+    ++ [div [
+          rearrangeIndicator
+            (case w.hover of
+              Nothing -> False
+              Just i ->
+                i > List.length w.tabs - 1
+            )
+            (Position (List.length w.tabs * tabSize.width) 5)
+        ] []]
+    )
 
 {-| places a border between frames which can be used to resize them -}
 border : Frame -> List (Html Msg)
@@ -250,16 +266,16 @@ border frame =
 --         div [ tabBarStyle ] (window_ 0 barWidth l)
 --
 --
--- windowDrag : Maybe MoveDrag -> Html Msg
--- windowDrag drag =
---   case drag of
---     Nothing -> div [] []
---     Just d ->
---       if d.moved then
---         div [ style (tabStyle True 200 (d.current.x + d.offset.x) ++ ["top" => (toString (d.current.y + d.offset.y) ++ "px")]) ]
---           [ text (case d.window of Tab _ name _ -> FilePath.takeFileName name) ]
---       else
---         div [] []
+floatingTab : Maybe MoveDrag -> Html Msg
+floatingTab drag =
+  case drag of
+    Nothing -> div [] []
+    Just d ->
+      if d.moved then
+        div [ tabStyle True (Size 200 30) (Position (d.current.x + d.offset.x) (d.current.y + d.offset.y)) ]
+          [ text d.tab.path ]
+      else
+        div [] []
 --
 -- -- HELPERS
 
@@ -271,21 +287,22 @@ onMouseDownBorder : Frame -> Attribute Msg
 onMouseDownBorder f =
   on "mousedown" (Decode.map (Msg.ResizeStart f) Mouse.position)
 
--- -- STYLES
---
--- rearrangeIndicator : Bool -> Attribute Msg
--- rearrangeIndicator overlap =
---   if overlap then
---     style
---       [ "position" => "absolute"
---       , "left" => "0"
---       , "height" => "100%"
---       , "width" => "3px"
---       , "background-color" => "#4e8dbd"
---       ]
---   else
---     style []
---
+-- STYLES
+
+rearrangeIndicator : Bool -> Position -> Attribute Msg
+rearrangeIndicator hovered pos =
+  if hovered then
+    style
+      [ "position" => "absolute"
+      , "left" => (toString pos.x ++ "px")
+      , "top" => (toString pos.y ++ "px")
+      , "height" => "30px"
+      , "width" => "3px"
+      , "background-color" => "#4e8dbd"
+      ]
+  else
+    style []
+
 tabBarStyle : Attribute Msg
 tabBarStyle =
   style

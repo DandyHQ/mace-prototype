@@ -27,8 +27,8 @@ update msg model =
     DragAt xy ->
       ( { model
           | resizeDrag = Maybe.map (\{frame, start} -> ResizeDrag frame start xy) model.resizeDrag
-          , moveDrag = Maybe.map (\{window, moved, offset, start} ->
-            MoveDrag window
+          , moveDrag = Maybe.map (\{tab, moved, offset, start} ->
+            MoveDrag tab
               (if moved || (abs (xy.x - start.x)) > 2 || (abs (xy.y - start.y)) > 2 then
                 True
               else
