@@ -2,6 +2,7 @@ module Frame exposing (initial, resizeAll, focus, resize, hover, rearrange)
 
 import Types exposing (..)
 import List.Extra as List
+import Debug
 
 borderWidth = 1
 
@@ -243,9 +244,33 @@ applyHoverTabBar drag frame =
   if hovered == frame then
     frame
   else
-    id (frame_ hovered)
+    prune (id (frame_ hovered))
+
+{-| removes empty nodes from the tree -}
+prune : Frame -> Frame
+prune frame =
+  let
+    notEmpty f = case f.children of
+      FrameFrame list ->
+        List.length list > 0
+      WindowFrame w ->
+        List.length w.tabs > 0
+    frame_ f =
+      case f.children of
+        FrameFrame list ->
+          let filtered = List.filter notEmpty list in
+          case filtered of
+            [] -> { f | children = FrameFrame [] }
+            hd :: [] -> resizeAll f.size { hd | tile = f.tile }
+            hd :: tl -> { f | children = FrameFrame (List.map frame_ filtered) }
+        WindowFrame w ->
+          f
+  in
+  frame_ frame |> id |> position
+
 
 {-| helper function. inserts a value at index into a list, or at the end of index too large -}
+insertAt : Int -> a -> List a -> List a
 insertAt key value list =
   case list of
     [] -> value :: []

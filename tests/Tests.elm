@@ -114,9 +114,9 @@ moveLastTab =
   Just (MoveDrag
     (Tab "0000" "/root/readme.md" "tiger")
     True
-    (Position -125 -19)
-    (Position 993 19)
-    (Position 1001 595)
+    (Position -84 -15)
+    (Position 385 15)
+    (Position 450 315)
     )
 
 afterSimpleRearrange : Frame
@@ -143,9 +143,9 @@ afterMoveLastTab =
         [ Tab "000" "/root/tutorial2.py" "cat"
         , Tab "001" "/root/example2.py" "dog"
         ]))
-    , Frame "01" (Size 299 600) (Position 301 0) Horiz ( WindowFrame (Window NoShadow Nothing 0
-        [ Tab "010" "/root/readme.md" "tiger"
-        , Tab "011" "/root/mouse.c" "pidgin"
+    , Frame "01" (Size 299 600) (Position 301 0) Horiz ( WindowFrame (Window NoShadow Nothing 1
+        [ Tab "010" "/root/mouse.c" "pidgin"
+        , Tab "011" "/root/readme.md" "tiger"
         , Tab "012" "/root/example2.py" "frog"
         , Tab "013" "/root/music.c" "song"
         ]))
