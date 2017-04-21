@@ -169,6 +169,7 @@ hover drag frame =
         frame
       else
         hoverTabBar d frame
+          |> hoverFrame d
 
 {-| takes a moveDrag and figures out if it's over a tab bar -}
 hoverTabBar : MoveDrag -> Frame -> Frame
@@ -192,6 +193,55 @@ hoverTabBar drag frame =
         { frame | children = WindowFrame { w | hover = Just ((dragPos.x - frame.pos.x + 100) // tabSize.width) } }
       else
         frame
+
+{-| takes a moveDrag and figures out if it's over a frame, causing a split -}
+hoverFrame : MoveDrag -> Frame -> Frame
+hoverFrame drag frame =
+    case frame.children of
+      FrameFrame list ->
+        { frame | children = FrameFrame (List.map (hoverFrame drag) list) }
+      WindowFrame w ->
+        let
+          dragPos = Position (drag.current.x + drag.offset.x + 100) (drag.current.y + drag.offset.y + 15)
+          windowSize = Size frame.size.width (frame.size.height - 35)
+          windowPos = Position frame.pos.x (frame.pos.y + 35)
+          -- is there a cleaner way to do this?
+          hovering =
+            if dragPos.x > windowPos.x + windowSize.width // 4
+              && dragPos.x < windowPos.x + windowSize.width - windowSize.width // 4
+              && dragPos.y > windowPos.y + windowSize.height // 4
+              && dragPos.y < windowPos.y + windowSize.height - windowSize.height // 4
+            then
+              Center
+            else if dragPos.x > windowPos.x + windowSize.width // 4
+              && dragPos.x < windowPos.x + windowSize.width - windowSize.width // 4
+              && dragPos.y > windowPos.y
+              && dragPos.y < windowPos.y + windowSize.height // 2
+            then
+              Top
+            else if dragPos.x > windowPos.x + windowSize.width // 4
+              && dragPos.x < windowPos.x + windowSize.width - windowSize.width // 4
+              && dragPos.y > windowPos.y + windowSize.height // 2
+              && dragPos.y < windowPos.y + windowSize.height
+            then
+              Bottom
+            else if dragPos.x > windowPos.x
+              && dragPos.x < windowPos.x + windowSize.width // 2
+              && dragPos.y > windowPos.y
+              && dragPos.y < windowPos.y + windowSize.height
+            then
+              Left
+            else if dragPos.x > windowPos.x + (windowSize.width - windowSize.width // 2)
+              && dragPos.x < windowPos.x + windowSize.width
+              && dragPos.y > windowPos.y
+              && dragPos.y < windowPos.y + windowSize.height
+            then
+              Right
+            else
+              NoShadow
+        in
+        { frame | children = WindowFrame { w | shadow = hovering } }
+
 
 {-| takes a moveDrag and applies what effect the hover is specifying -}
 rearrange : Maybe MoveDrag -> Frame -> Frame

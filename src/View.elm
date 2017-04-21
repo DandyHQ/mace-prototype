@@ -55,7 +55,9 @@ frame f =
 window : Size -> Position -> Window -> List (Html Msg)
 window size pos w =
   [ div [ windowStyle size pos ]
-      [ tabBar size pos w ]
+      [ tabBar size pos w
+      , div [ windowShadow w.shadow (Size size.width (size.height - 35)) (Position 0 35) ] []
+      ]
   ]
 
 {-| renders the tab bar -}
@@ -276,8 +278,20 @@ floatingTab drag =
           [ text d.tab.path ]
       else
         div [] []
---
--- -- HELPERS
+
+-- HELPERS
+
+windowShadow : Shadow -> Size -> Position -> Attribute Msg
+windowShadow shadow size pos =
+  if shadow == NoShadow then style [] else
+    style
+      [ "position" => "absolute"
+      , "top" => (toString (if shadow == Bottom then pos.y + (size.height // 2) else pos.y) ++ "px")
+      , "left" => (toString (if shadow == Right then pos.x + (size.width // 2) else pos.x) ++ "px")
+      , "width" => (toString (if shadow == Left || shadow == Right then (size.width - size.width // 2) else size.width) ++ "px")
+      , "height" => (toString (if shadow == Top || shadow == Bottom then (size.height - size.height // 2) else size.height) ++ "px")
+      , "background-color" => "rgba(0, 0, 0, 0.1)"
+      ]
 
 onMouseDownTab : Tab -> Position -> Attribute Msg
 onMouseDownTab w tabPos =
