@@ -128,7 +128,7 @@ resize drag frame =
               _ ->
                 a :: b :: tl
           else
-            a :: children_ d (b :: tl)
+            frame_ d a :: children_ d (b :: tl)
 
     frame_ d f =
       case f.children of
