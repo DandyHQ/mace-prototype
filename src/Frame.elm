@@ -168,7 +168,8 @@ hover drag frame =
       if not d.moved then
         frame
       else
-        hoverTabBar d frame
+        frame
+          |> hoverTabBar d
           |> hoverFrame d
 
 {-| takes a moveDrag and figures out if it's over a tab bar -}
@@ -252,8 +253,16 @@ rearrange drag frame =
       if not d.moved then
         frame
       else
-        applyHoverTabBar d frame
-          |> applyHoverFrame d
+        let
+          framed = applyHoverFrame d frame
+          tabbed = applyHoverTabBar d frame
+        in
+        if framed /= frame then
+          framed
+        else if tabbed /= frame then
+          tabbed
+        else
+          frame
 
 {-| calls hoverTabBar and applies the transformation it represents -}
 applyHoverTabBar : MoveDrag -> Frame -> Frame
