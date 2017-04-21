@@ -253,6 +253,7 @@ rearrange drag frame =
         frame
       else
         applyHoverTabBar d frame
+          |> applyHoverFrame d
 
 {-| calls hoverTabBar and applies the transformation it represents -}
 applyHoverTabBar : MoveDrag -> Frame -> Frame
@@ -295,6 +296,71 @@ applyHoverTabBar drag frame =
     frame
   else
     prune (id (frame_ hovered))
+
+{-| calls hoverFrame and applies the transformation it represents -}
+applyHoverFrame : MoveDrag -> Frame -> Frame
+applyHoverFrame drag frame =
+  let
+    hovered = hoverFrame drag frame
+    frame_ f =
+      case f.children of
+        FrameFrame list ->
+          { f | children = FrameFrame (List.map frame_ list) }
+        WindowFrame w ->
+          let
+            updatedTabs = List.remove drag.tab w.tabs
+          in
+          case w.shadow of
+            NoShadow ->
+              { f | children = WindowFrame { w | tabs = updatedTabs } }
+            Center ->
+              if updatedTabs /= w.tabs then
+                -- we are adding back the tab we just removed
+                { f | children = WindowFrame { w | shadow = NoShadow } }
+              else
+                { f | children = WindowFrame { w | shadow = NoShadow, tabs = w.tabs ++ [ drag.tab ] } }
+            Top ->
+              { f | children = FrameFrame (
+                Frame "new" (Size f.size.width (f.size.height // 2)) (Position 0 0) Vert
+                  (WindowFrame (Window NoShadow Nothing 0 [drag.tab]))
+                ::
+                Frame "new" (Size f.size.width (f.size.height - f.size.height // 2 - 1)) (Position 0 0) Vert
+                  (WindowFrame { w | shadow = NoShadow, tabs = updatedTabs })
+                :: []
+              )}
+            Right ->
+              { f | children = FrameFrame (
+                Frame "new" (Size (f.size.width // 2) f.size.height) (Position 0 0) Horiz
+                  (WindowFrame { w | shadow = NoShadow, tabs = updatedTabs })
+                ::
+                Frame "new" (Size (f.size.width - f.size.width // 2 - 1) f.size.height) (Position 0 0) Horiz
+                  (WindowFrame (Window NoShadow Nothing 0 [drag.tab]))
+                :: []
+              )}
+            Bottom ->
+              { f | children = FrameFrame (
+                Frame "new" (Size f.size.width (f.size.height // 2)) (Position 0 0) Vert
+                  (WindowFrame { w | shadow = NoShadow, tabs = updatedTabs })
+                ::
+                Frame "new" (Size f.size.width (f.size.height - f.size.height // 2 - 1)) (Position 0 0) Vert
+                  (WindowFrame (Window NoShadow Nothing 0 [drag.tab]))
+                :: []
+              )}
+            Left ->
+              { f | children = FrameFrame (
+                Frame "new" (Size (f.size.width // 2) f.size.height) (Position 0 0) Horiz
+                  (WindowFrame (Window NoShadow Nothing 0 [drag.tab]))
+                ::
+                Frame "new" (Size (f.size.width - f.size.width // 2 - 1) f.size.height) (Position 0 0) Horiz
+                  (WindowFrame { w | shadow = NoShadow, tabs = updatedTabs })
+                :: []
+              )}
+  in
+  if hovered == frame then
+    frame
+  else
+    prune (id (frame_ hovered))
+
 
 {-| removes empty nodes from the tree -}
 prune : Frame -> Frame
