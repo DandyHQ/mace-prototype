@@ -4,7 +4,11 @@ import Types exposing (..)
 import List.Extra as List
 import Debug
 
+borderWidth : Int
 borderWidth = 1
+
+mimimumSize : Size
+mimimumSize = Size 20 20
 
 {-| initial test layout of the application window -}
 initial : Frame

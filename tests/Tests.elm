@@ -5,6 +5,7 @@ import Types exposing (..)
 import Expect
 import FilePath
 import Frame
+import FrameTests
 import Fuzz exposing (list, int, tuple, string)
 import String
 
@@ -12,7 +13,8 @@ import String
 all : Test
 all =
     describe "mace"
-        [ filePath
+        [ FrameTests.all
+        , filePath
         , resizeFrame
         , rearrangeFrame
         ]
