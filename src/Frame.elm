@@ -1,4 +1,4 @@
-module Frame exposing (initial, resizeAll, focus, resize, hover, rearrange)
+module Frame exposing (initial, resizeAll, focus, resize, hover, rearrange, borderWidth, minimumSize)
 
 import Types exposing (..)
 import List.Extra as List
@@ -7,8 +7,8 @@ import Debug
 borderWidth : Int
 borderWidth = 1
 
-mimimumSize : Size
-mimimumSize = Size 20 20
+minimumSize : Size
+minimumSize = Size 20 20
 
 {-| initial test layout of the application window -}
 initial : Frame
