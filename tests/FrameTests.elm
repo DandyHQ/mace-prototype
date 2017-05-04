@@ -9,40 +9,50 @@ import Fuzz exposing (list, int, tuple, string)
 all : Test
 all =
     describe "frame tests"
-        [ --resizeFrame
+        [ resizeFrame
         ]
 
+{-| Calculates the total minimum size of a frame -}
+totalMinimum : Frame -> Size
+totalMinimum frame =
+  let
+    children_ l s =
+      case l of
+        [] -> s
+        hd :: [] ->
+          case hd.tile of
+            Horiz -> Size (s.width + (frame_ hd).width) (frame_ hd).height
+            Vert -> Size (frame_ hd).width (s.height + (frame_ hd).height)
+            NoTile -> minimumSize
+        hd :: tl ->
+          case hd.tile of
+            Horiz ->
+              children_ tl (Size (s.width + (frame_ hd).width + borderWidth) (frame_ hd).height)
+            Vert ->
+              children_ tl (Size (frame_ hd).width (s.height + (frame_ hd).height + borderWidth))
+            NoTile -> Size 0 0
+    frame_ f =
+      case f.children of
+        FrameFrame list ->
+          children_ list (Size 0 0)
+        WindowFrame _ ->
+          minimumSize
+  in
+  frame_ frame
+
+{-| XXX this should be failing -}
 checkResize : Size -> Frame -> Bool
 checkResize size frame =
   let
-    totalMinimum =
-      let
-        children_ l s =
-          case l of
-            [] -> s
-            hd :: [] ->
-              case hd.tile of
-                Horiz -> Size (s.width + minimumSize.width) minimumSize.height
-                Vert -> Size minimumSize.width (s.height + minimumSize.height)
-                NoTile -> minimumSize
-            hd :: tl ->
-              case hd.tile of
-                Horiz ->
-                  children_ tl (Size (s.width + minimumSize.width + borderWidth) minimumSize.height)
-                Vert ->
-                  children_ tl (Size minimumSize.width (s.height + minimumSize.height + borderWidth))
-                NoTile -> Size 0 0
-        frame_ f =
-          case f.children of
-            FrameFrame list ->
-              children_ list (Size 0 0)
-            WindowFrame _ ->
-              Size 0 0
-      in
-      frame_ frame
+    minSize = totalMinimum frame
+    newSize =
+      Size
+        (if minSize.width > size.width then minSize.width else size.width)
+        (if minSize.height > size.height then minSize.height else size.height)
+    updatedFrame =
+      Frame.resizeAll newSize frame
   in
-  False
-
+  updatedFrame.size == newSize
 
 resizeFrame : Test
 resizeFrame =
