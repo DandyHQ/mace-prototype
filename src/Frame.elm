@@ -37,6 +37,22 @@ resizeAll newSize frame =
       round (toFloat a / toFloat b * toFloat c)
     scaleWidth = scale newSize.width frame.size.width
     scaleHeight = scale newSize.height frame.size.height
+    addSize tile a b =
+      case tile of
+        Horiz -> Size (a.width + b.width) a.height
+        Vert -> Size a.width (a.height + b.height)
+        _ -> Size 0 0
+    sumChildren l =
+      let
+        addTile =
+          case List.head l of
+            Nothing -> addSize NoTile
+            Just frame -> addSize frame.tile
+      in
+      l
+        |> List.map (\v -> v.size)
+        |> List.intersperse (Size borderWidth borderWidth)
+        |> List.foldl (\val acc -> addTile val acc) (Size 0 0) -- works because last item has correct size
     children_ parentSize rem l =
       case l of
         [] -> []
@@ -59,9 +75,23 @@ resizeAll newSize frame =
     frame_ parentSize f =
       case f.children of
         FrameFrame list ->
-          { f | size = parentSize, children = FrameFrame (children_ parentSize parentSize list) }
+          let
+            updatedChildren = children_ parentSize parentSize list
+            childrenSize = sumChildren updatedChildren
+            newSize =
+              Size
+                (clamp childrenSize.width parentSize.width parentSize.width)
+                (clamp childrenSize.height parentSize.height parentSize.height)
+          in
+          { f | size = newSize, children = FrameFrame updatedChildren }
         WindowFrame _ ->
-          { f | size = parentSize }
+          let
+            newSize =
+              Size
+                (clamp minimumSize.width parentSize.width parentSize.width)
+                (clamp minimumSize.height parentSize.height parentSize.height)
+          in
+          { f | size = newSize }
 
   in
   position (frame_ newSize frame)
