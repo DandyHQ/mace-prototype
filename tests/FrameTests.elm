@@ -1,11 +1,11 @@
-module FrameTests exposing(all)
+module FrameTests exposing(..)
 
 import Debug
 import Test exposing (..)
 import Types exposing (..)
 import Expect
 import Frame exposing (borderWidth, minimumSize)
-import Fuzz exposing (list, int, tuple, string)
+import Fuzz exposing (list, int, tuple, tuple5, string)
 
 all : Test
 all =
@@ -41,9 +41,19 @@ totalMinimum frame =
   in
   frame_ frame
 
+{-| Checks that the size of the children added together equals the size of the parent -}
+childrenAddToParent : Frame -> Bool
+childrenAddToParent frame =
+  case frame.children of
+    FrameFrame list ->
+      frame.size == Frame.sumChildren list
+      && List.all childrenAddToParent list
+    WindowFrame _ ->
+      True
+
 {-| Check that the resize is correct and larger than the minimum -}
-checkResize : Size -> Frame -> Bool
-checkResize size frame =
+checkResizeAll : Size -> Frame -> Bool
+checkResizeAll size frame =
   let
     minSize = totalMinimum frame
     newSize =
@@ -57,6 +67,33 @@ checkResize size frame =
   -- but users won't notice so we don't car
   abs (updatedFrame.size.width - newSize.width) < 2
   && abs (updatedFrame.size.height - newSize.height) < 2
+  && childrenAddToParent updatedFrame
+
+{-| Turns all the frames into a list, and extracts an index -}
+getFrameByIndex : Int -> Frame -> Frame
+getFrameByIndex index frame =
+  let
+    frame_ f =
+      case f.children of
+        FrameFrame list ->
+          f :: List.concatMap frame_ list
+        WindowFrame _ ->
+          [f]
+    getByIndex i l =
+      case l of
+        [] -> frame -- appease the compiler
+        hd :: [] -> hd
+        hd :: tl -> if i == 0 then hd else getByIndex (i - 1) tl
+  in
+  getByIndex index (frame_ frame)
+
+checkResize : ResizeDrag -> Frame -> Bool
+checkResize drag frame =
+  let
+    resized = Frame.resize (Just drag) frame
+  in
+  childrenAddToParent resized
+  && frame.size == resized.size
 
 resizeFrame : Test
 resizeFrame =
@@ -65,6 +102,13 @@ resizeFrame =
         \(a, b) ->
           Frame.initial
             |> Frame.resizeAll (Size a b)
-            |> checkResize (Size a b)
-            |> Expect.true "Expected outer frame to equal new size or the minimum size"
+            |> checkResizeAll (Size a b)
+            |> Expect.true "Expected resizeAll to have valid properties"
+    -- , fuzz (tuple5 (int, int, int, int, int)) "resizes a partition between frames" <|
+    --     \(id, x1, y1, x2, y2) ->
+    --       let drag = ResizeDrag (getFrameByIndex id Frame.initial) (Position x1 y1) (Position x2 y2) in
+    --       Frame.initial
+    --         |> Frame.resize (Just drag)
+    --         |> checkResize drag
+    --         |> Expect.true "Expected resize to have valid properties"
     ]
