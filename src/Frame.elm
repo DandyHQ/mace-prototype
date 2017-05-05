@@ -154,13 +154,43 @@ resize drag frame =
             -- we have found the frame. now do the resize
             case a.tile of
               Horiz ->
-                resizeAll (Size (a.size.width + (d.current.x - d.start.x)) a.size.height) a
-                :: resizeAll (Size (b.size.width - (d.current.x - d.start.x)) b.size.height) b
-                :: tl
+                let
+                  totalWidth = a.size.width + b.size.width + borderWidth
+                  newSizeA = Size (a.size.width + (d.current.x - d.start.x)) a.size.height
+                  newSizeB = Size (b.size.width - (d.current.x - d.start.x)) b.size.height
+                  resizedA = resizeAll newSizeA a
+                  resizedB = resizeAll newSizeB b
+                  resizedA2 =
+                    if newSizeB == resizedB.size then
+                      resizedA
+                    else
+                      resizeAll (Size (totalWidth - resizedB.size.width - borderWidth) a.size.height) a
+                  resizedB2 =
+                    if newSizeA == resizedA.size then
+                      resizedB
+                    else
+                      resizeAll (Size (totalWidth - resizedA.size.width - borderWidth) b.size.height) b
+                in
+                resizedA2 :: resizedB2 :: tl
               Vert ->
-                resizeAll (Size a.size.width (a.size.height + (d.current.y - d.start.y))) a
-                :: resizeAll (Size b.size.width (b.size.height - (d.current.y - d.start.y))) b
-                :: tl
+                let
+                  totalHeight = a.size.height + b.size.height + borderWidth
+                  newSizeA = Size a.size.width (a.size.height + (d.current.y - d.start.y))
+                  newSizeB = Size b.size.width (b.size.height - (d.current.y - d.start.y))
+                  resizedA = resizeAll newSizeA a
+                  resizedB = resizeAll newSizeB b
+                  resizedA2 =
+                    if newSizeB == resizedB.size then
+                      resizedA
+                    else
+                      resizeAll (Size a.size.width (totalHeight - resizedB.size.height - borderWidth)) a
+                  resizedB2 =
+                    if newSizeA == resizedA.size then
+                      resizedB
+                    else
+                      resizeAll (Size b.size.width (totalHeight - resizedA.size.height - borderWidth)) b
+                in
+                resizedA2 :: resizedB2 :: tl
               -- something's wrong
               _ ->
                 a :: b :: tl

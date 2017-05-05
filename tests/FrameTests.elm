@@ -104,11 +104,12 @@ resizeFrame =
             |> Frame.resizeAll (Size a b)
             |> checkResizeAll (Size a b)
             |> Expect.true "Expected resizeAll to have valid properties"
-    -- , fuzz (tuple5 (int, int, int, int, int)) "resizes a partition between frames" <|
-    --     \(id, x1, y1, x2, y2) ->
-    --       let drag = ResizeDrag (getFrameByIndex id Frame.initial) (Position x1 y1) (Position x2 y2) in
-    --       Frame.initial
-    --         |> Frame.resize (Just drag)
-    --         |> checkResize drag
-    --         |> Expect.true "Expected resize to have valid properties"
+    -- this test could be smarter
+    , fuzz (tuple5 (int, int, int, int, int)) "resizes a partition between frames" <|
+        \(id, x1, y1, x2, y2) ->
+          let drag = ResizeDrag (getFrameByIndex id Frame.initial) (Position x1 y1) (Position x2 y2) in
+          Frame.initial
+            |> Frame.resize (Just drag)
+            |> checkResize drag
+            |> Expect.true "Expected resize to have valid properties"
     ]
