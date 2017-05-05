@@ -1,5 +1,6 @@
 module FrameTests exposing(all)
 
+import Debug
 import Test exposing (..)
 import Types exposing (..)
 import Expect
@@ -40,7 +41,7 @@ totalMinimum frame =
   in
   frame_ frame
 
-{-| XXX this should be failing -}
+{-| Check that the resize is correct and larger than the minimum -}
 checkResize : Size -> Frame -> Bool
 checkResize size frame =
   let
@@ -50,7 +51,7 @@ checkResize size frame =
         (if minSize.width > size.width then minSize.width else size.width)
         (if minSize.height > size.height then minSize.height else size.height)
     updatedFrame =
-      Frame.resizeAll newSize frame
+      Frame.resizeAll size frame
   in
   updatedFrame.size == newSize
 
