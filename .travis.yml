@@ -1,0 +1,21 @@
+language: node_js
+node_js: node
+
+install:
+  - npm install -g elm
+  - npm install -g elm-test
+  - elm package install -y
+  - pushd tests && elm package install -y && popd
+
+before_script:
+  - elm make src/Main.elm --output=mace.js
+
+script:
+  - elm-test
+
+deploy:
+  provider: pages
+  skip_cleanup: true
+  github_token: $GITHUB_TOKEN # Set in travis-ci.org dashboard
+  on:
+    branch: master
